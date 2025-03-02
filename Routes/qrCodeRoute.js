@@ -1,9 +1,10 @@
 import express from 'express';
 
-import { getDataFromQrcode } from '../Controllers/qrcodeController.js';
+import { getDataFromQrcode, getDataFromPassport } from '../Controllers/qrcodeController.js';
 
 const router = express.Router();
 
-router.get('/', getDataFromQrcode);
+router.get('/Qrcode', getDataFromQrcode);
+router.get('/', getDataFromPassport);
 
 export default router;

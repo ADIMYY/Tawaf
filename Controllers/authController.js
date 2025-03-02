@@ -53,7 +53,7 @@ export const resizeImage = asyncHandler(async (req, res, next) => {
 async function generateQrcode(user) {
     try {
         const fileName = user._id;
-        const url = `localhost:3000/api/v1/get-data?id=${user._id}`;
+        const url = `https://tawaf-isp4-rd5yaljwb-adimys-projects.vercel.app/api/v1/get-data/Qrcode?id=${user._id}`;
         const tempDir = join(__dirname, '../uplouds/usersQrcodes');
         if (!fs.existsSync(tempDir)) {
             fs.mkdirSync(tempDir);
