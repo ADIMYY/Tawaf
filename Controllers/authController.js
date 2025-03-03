@@ -17,9 +17,6 @@ import sendEmail from '../Utils/sendEmail.js';
 import { uploadSingleImage } from '../Middleware/uploadImageMiddleware.js';
 import generateToken from '../Utils/generateToken.js';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
 export const uploadUserImage = uploadSingleImage('photo');
 
 export const resizeImage = asyncHandler(async (req, res, next) => {
