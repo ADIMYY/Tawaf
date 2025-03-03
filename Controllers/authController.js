@@ -28,8 +28,13 @@ export const resizeImage = asyncHandler(async (req, res, next) => {
     const filePath = `uplouds/users/${fileName}`;
 
     if (!req.file) {
-        console.log('No file eceivedr');
+        console.log('No file received');
         return next();
+    }
+
+    const tempDir = join(__dirname, '../uplouds/users');
+    if (!fs.existsSync(tempDir)) {
+        fs.mkdirSync(tempDir);
     }
 
     if (req.file) {
