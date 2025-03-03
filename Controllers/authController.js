@@ -23,18 +23,9 @@ const __dirname = dirname(__filename);
 export const uploadUserImage = uploadSingleImage('photo');
 
 export const resizeImage = asyncHandler(async (req, res, next) => {
-    var id = uuidv4();
-    const fileName = `user-${id}-${Date.now()}.jpeg`;
-    const filePath = `uploads/users/${fileName}`;
-
     if (!req.file) {
         console.log('No file received');
         return next();
-    }
-
-    const tempDir = join(__dirname, '../uploads/users');
-    if (!fs.existsSync(tempDir)) {
-        fs.mkdirSync(tempDir);
     }
 
     if (req.file) {
