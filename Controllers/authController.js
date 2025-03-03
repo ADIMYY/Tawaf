@@ -25,14 +25,14 @@ export const uploadUserImage = uploadSingleImage('photo');
 export const resizeImage = asyncHandler(async (req, res, next) => {
     var id = uuidv4();
     const fileName = `user-${id}-${Date.now()}.jpeg`;
-    const filePath = `uplouds/users/${fileName}`;
+    const filePath = `uploads/users/${fileName}`;
 
     if (!req.file) {
         console.log('No file received');
         return next();
     }
 
-    const tempDir = join(__dirname, '../uplouds/users');
+    const tempDir = join(__dirname, '../uploads/users');
     if (!fs.existsSync(tempDir)) {
         fs.mkdirSync(tempDir);
     }
@@ -59,7 +59,7 @@ async function generateQrcode(user) {
     try {
         const fileName = user._id;
         const url = `https://tawaf-isp4-rd5yaljwb-adimys-projects.vercel.app/api/v1/get-data/Qrcode?id=${user._id}`;
-        const tempDir = join(__dirname, '../uplouds/usersQrcodes');
+        const tempDir = join(__dirname, '../uploads/usersQrcodes');
         if (!fs.existsSync(tempDir)) {
             fs.mkdirSync(tempDir);
         }
