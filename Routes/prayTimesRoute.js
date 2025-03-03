@@ -5,6 +5,6 @@ import { protect } from '../Controllers/authController.js';
 
 const router = express.Router();
 
-router.route('/').get(protect, getPrayTimes);
+router.route('/:lat/:lon').get(protect, getPrayTimes);
 
 export default router;
