@@ -38,18 +38,20 @@ export const resizeImage = asyncHandler(async (req, res, next) => {
     }
 
     if (req.file) {
-        await sharp(req.file.buffer)
+        const buffer = await sharp(req.file.buffer)
             .resize(600, 600)
             .toFormat('jpeg')
             .jpeg({ quality: 90 })
-            .toFile(filePath);
+            .toBuffer();
 
-        const photoUrl = await cloudinary.uploader.upload(filePath, {
-            folder: 'profiles', // Optional: specify a folder in Cloudinary
-            public_id: id // Optional: specify a public ID
+        const photoUrl = await new Promise((resolve, reject) => {
+            cloudinary.uploader.upload_stream({ folder: 'profiles' }, (error, result) => {
+                if (error) reject(error);
+                else resolve(result.secure_url);
+            }).end(buffer);
         });
-        req.body.photo = photoUrl.secure_url;
-        await fs.promises.unlink(filePath);
+        
+        req.body.photo = photoUrl;
     }
     next();
 });
