@@ -23,29 +23,36 @@ const __dirname = dirname(__filename);
 export const uploadUserImage = uploadSingleImage('photo');
 
 export const resizeImage = asyncHandler(async (req, res, next) => {
-    var id = uuidv4();
-    const fileName = `user-${id}-${Date.now()}.jpeg`;
-    const filePath = `uplouds/users/${fileName}`;
+    const id = uuidv4();
 
     if (!req.file) {
-        console.log('No file eceivedr');
+        console.log('No file received');
         return next();
     }
 
-    if (req.file) {
-        await sharp(req.file.buffer)
-            .resize(600, 600)
-            .toFormat('jpeg')
-            .jpeg({ quality: 90 })
-            .toFile(filePath);
+    // Resize image in memory and get buffer
+    const resizedBuffer = await sharp(req.file.buffer)
+        .resize(600, 600)
+        .toFormat('jpeg')
+        .jpeg({ quality: 90 })
+        .toBuffer();
 
-        const photoUrl = await cloudinary.uploader.upload(filePath, {
-            folder: 'profiles', // Optional: specify a folder in Cloudinary
-            public_id: id // Optional: specify a public ID
-        });
-        req.body.photo = photoUrl.secure_url;
-        await fs.promises.unlink(filePath);
-    }
+    // Upload directly from buffer to Cloudinary
+    const photoUrl = await new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+            {
+                folder: 'profiles',
+                public_id: id,
+            },
+            (error, result) => {
+                if (error) reject(error);
+                else resolve(result);
+            }
+        );
+        stream.end(resizedBuffer);
+    });
+
+    req.body.photo = photoUrl.secure_url;
     next();
 });
 
@@ -54,26 +61,27 @@ async function generateQrcode(user) {
     try {
         const fileName = user._id;
         const url = `localhost:3000/api/v1/get-data?id=${user._id}`;
-        const tempDir = join(__dirname, '../uplouds/usersQrcodes');
-        if (!fs.existsSync(tempDir)) {
-            fs.mkdirSync(tempDir);
-        }
-        // Generate QR code and save it locally
-        const filePath = join(tempDir, `${fileName}.png`);
-        await QRCode.toFile(filePath, url);
-        
-        // Upload the QR code to Cloudinary
-        const result = await cloudinary.uploader.upload(filePath, {
-        folder: 'qr_codes', // Optional: specify a folder in Cloudinary
-        public_id: fileName, // Optional: specify a public ID
+
+        // Generate QR code as a buffer
+        const qrBuffer = await QRCode.toBuffer(url);
+
+        // Upload directly to Cloudinary
+        const result = await new Promise((resolve, reject) => {
+            const stream = cloudinary.uploader.upload_stream(
+                {
+                    folder: 'qr_codes',
+                    public_id: fileName,
+                },
+                (error, result) => {
+                    if (error) reject(error);
+                    else resolve(result);
+                }
+            );
+            stream.end(qrBuffer);
         });
-        
-        
-        // Delete the local file after upload
-        fs.unlinkSync(filePath);
-    
+
         return result.secure_url;
-    } catch(error) {
+    } catch (error) {
         console.error('Error generating QR code:', error);
         throw error;
     }
