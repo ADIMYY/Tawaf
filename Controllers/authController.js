@@ -29,11 +29,25 @@ export const resizeImage = asyncHandler(async (req, res, next) => {
     }
 
     if (req.file) {
-        const buffer = await sharp(req.file.buffer)
-            .resize(600, 600)
-            .toFormat('jpeg')
-            .jpeg({ quality: 90 })
-            .toBuffer();
+        let buffer;
+        if (req.file.buffer) {
+            // File is uploaded as a buffer
+            buffer = await sharp(req.file.buffer)
+                .resize(600, 600)
+                .toFormat('jpeg')
+                .jpeg({ quality: 90 })
+                .toBuffer();
+        } else if (req.file.path) {
+            // File is uploaded as a temporary file
+            buffer = await sharp(req.file.path)
+                .resize(600, 600)
+                .toFormat('jpeg')
+                .jpeg({ quality: 90 })
+                .toBuffer();
+        } else {
+            console.error('Invalid file format');
+            return next(new appError('Invalid file format', 400));
+        }
 
         const photoUrl = await new Promise((resolve, reject) => {
             cloudinary.uploader.upload_stream({ folder: 'profiles' }, (error, result) => {
