@@ -11,9 +11,8 @@ const formatTime = (time) => {
 
 //! Controller to get prayer times
 export const getPrayTimes = asyncHandler(async (req, res, next) => {
-    // Parse latitude and longitude from environment variables
-    const latitude = parseFloat(process.env.LAT);
-    const longitude = parseFloat(process.env.LON);
+    const latitude = parseFloat(req.body.latitude);
+    const longitude = parseFloat(req.body.longitude);
 
     //! Validate coordinates
     if (isNaN(latitude) || isNaN(longitude)) {
