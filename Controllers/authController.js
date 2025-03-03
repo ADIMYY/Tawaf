@@ -23,40 +23,28 @@ const __dirname = dirname(__filename);
 export const uploadUserImage = uploadSingleImage('photo');
 
 export const resizeImage = asyncHandler(async (req, res, next) => {
+    var id = uuidv4();
+    const fileName = `user-${id}-${Date.now()}.jpeg`;
+    const filePath = `uplouds/users/${fileName}`;
+
     if (!req.file) {
-        console.log('No file received');
+        console.log('No file eceivedr');
         return next();
     }
 
     if (req.file) {
-        let buffer;
-        if (req.file.buffer) {
-            // File is uploaded as a buffer
-            buffer = await sharp(req.file.buffer)
-                .resize(600, 600)
-                .toFormat('jpeg')
-                .jpeg({ quality: 90 })
-                .toBuffer();
-        } else if (req.file.path) {
-            // File is uploaded as a temporary file
-            buffer = await sharp(req.file.path)
-                .resize(600, 600)
-                .toFormat('jpeg')
-                .jpeg({ quality: 90 })
-                .toBuffer();
-        } else {
-            console.error('Invalid file format');
-            return next(new appError('Invalid file format', 400));
-        }
+        await sharp(req.file.buffer)
+            .resize(600, 600)
+            .toFormat('jpeg')
+            .jpeg({ quality: 90 })
+            .toFile(filePath);
 
-        const photoUrl = await new Promise((resolve, reject) => {
-            cloudinary.uploader.upload_stream({ folder: 'profiles' }, (error, result) => {
-                if (error) reject(error);
-                else resolve(result.secure_url);
-            }).end(buffer);
+        const photoUrl = await cloudinary.uploader.upload(filePath, {
+            folder: 'profiles', // Optional: specify a folder in Cloudinary
+            public_id: id // Optional: specify a public ID
         });
-        
-        req.body.photo = photoUrl;
+        req.body.photo = photoUrl.secure_url;
+        await fs.promises.unlink(filePath);
     }
     next();
 });
@@ -65,8 +53,8 @@ export const resizeImage = asyncHandler(async (req, res, next) => {
 async function generateQrcode(user) {
     try {
         const fileName = user._id;
-        const url = `https://tawaf-isp4-rd5yaljwb-adimys-projects.vercel.app/api/v1/get-data/Qrcode?id=${user._id}`;
-        const tempDir = join(__dirname, '../uploads/usersQrcodes');
+        const url = `localhost:3000/api/v1/get-data?id=${user._id}`;
+        const tempDir = join(__dirname, '../uplouds/usersQrcodes');
         if (!fs.existsSync(tempDir)) {
             fs.mkdirSync(tempDir);
         }
