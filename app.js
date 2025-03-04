@@ -5,7 +5,6 @@ import dotenv from 'dotenv';
 import morgan from 'morgan';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
-import ngrok from '@ngrok/ngrok';
 import cors from 'cors';
 
 import authRoute from './Routes/authRoute.js';
@@ -48,16 +47,5 @@ app.use('/api/v1/prayTimes', prayTimes);
 app.use(globalError);
 
 app.listen(port, async () => {
-    try {
-        console.log(`Server running at http://localhost:${port}`);
-    
-        const url = await ngrok.connect({
-            addr: port,
-            authtoken: process.env.NGROK_AUTH,
-        });
-    
-        console.log(`Ngrok tunnel created at: ${url.url()}`);
-    } catch (error) {
-        console.error('Ngrok Error:', error);
-    }
+    console.log(`Server is running on port ${port}`);
 });

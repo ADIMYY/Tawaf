@@ -13,6 +13,7 @@ const formatTime = (time, timeZone) => {
 //! Controller to get prayer times for any place based on latitude and longitude
 export const getPrayTimes = asyncHandler(async (req, res, next) => {
     try {
+        console.log(req.protocol);
         // Extract latitude and longitude from request parameters
         const latitude = parseFloat(req.params.lat);
         const longitude = parseFloat(req.params.lon);
