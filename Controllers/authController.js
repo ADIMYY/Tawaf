@@ -56,25 +56,18 @@ export const resizeImage = asyncHandler(async (req, res, next) => {
 
 async function generateQrcode(user) {
     try {
-        const fileName = user._id;
-        const url = `https://tawaf-isp4-7kgzcvd5z-adimys-projects.vercel.app/api/v1/get-data?id=${user._id}`;
+        const fileName = `${user._id}.png`; // Unique filename for each user
+        const protocol = req.get('X-Forwarded-Proto') || req.protocol;
+        const host = req.get('X-Forwarded-Host') || req.get('host');
+        const url = `${protocol}://${host}/api/v1/get-data?id=${user._id}`;
 
         // Generate QR code as a buffer
         const qrBuffer = await QRCode.toBuffer(url);
 
         // Upload directly to Cloudinary
-        const result = await new Promise((resolve, reject) => {
-            const stream = cloudinary.uploader.upload_stream(
-                {
-                    folder: 'qr_codes',
-                    public_id: fileName,
-                },
-                (error, result) => {
-                    if (error) reject(error);
-                    else resolve(result);
-                }
-            );
-            stream.end(qrBuffer);
+        const result = await cloudinary.uploader.upload(qrBuffer, {
+            folder: 'qr_codes',
+            public_id: fileName
         });
 
         return result.secure_url;
