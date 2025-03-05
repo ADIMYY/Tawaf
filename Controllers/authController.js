@@ -57,9 +57,7 @@ export const resizeImage = asyncHandler(async (req, res, next) => {
 async function generateQrcode(user) {
     try {
         const fileName = `${user._id}.png`; // Unique filename for each user
-        const protocol = req.get('X-Forwarded-Proto') || req.protocol;
-        const host = req.get('X-Forwarded-Host') || req.get('host');
-        const url = `${protocol}://${host}/api/v1/get-data?id=${user._id}`;
+        const url = `https://tawaf-isp4-1lec6n3vu-adimys-projects.vercel.app/api/v1/get-data?id=${user._id}`;
 
         // Generate QR code as a buffer
         const qrBuffer = await QRCode.toBuffer(url);
