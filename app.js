@@ -1,6 +1,8 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import morgan from 'morgan';
+import mongoose from "mongoose";
+import { v2 as cloudinary } from 'cloudinary';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import cors from 'cors';
@@ -20,6 +22,16 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 dotenv.config({ path: join(__dirname, 'config.env') });
+
+
+const db = process.env.DATA_BASE.replace('<db_password>', process.env.DB_PASSWORD);
+await mongoose.connect(db);
+cloudinary.config({
+    cloud_name: process.env.CLOUD_NAME,
+    api_key: process.env.API_KEY,
+    api_secret: process.env.API_SECRET,
+});
+
 
 const app = express();
 const port = process.env.PORT || 3000;
