@@ -49,10 +49,7 @@ const userSchema = new mongoose.Schema(
             enum: ['user', 'admin'],
             default: 'user',
         },
-        approved: {
-            type: Boolean,
-            default: false,
-        },
+        approved: String,
         passwordChangeAt: Date,
         gender: {
             type: String,

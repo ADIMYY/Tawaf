@@ -1,6 +1,6 @@
 import express from 'express';
 
-import { getDataFromQrcode, getDataFromPassport } from '../Controllers/qrcodeController.js';
+import { getDataFromQrcode, getDataFromPassport } from '../Controllers/getDataController.js';
 
 const router = express.Router();
 

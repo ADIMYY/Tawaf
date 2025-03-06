@@ -10,7 +10,7 @@ import cors from 'cors';
 import authRoute from './Routes/authRoute.js';
 import userRoute from './Routes/userRoutes.js';
 import weatherRoute from './Routes/weatherRoute.js';
-import qrCodeRoute from './Routes/qrCodeRoute.js';
+import getDataRoute from './Routes/getDataRoute.js';
 import prayTimes from './Routes/prayTimesRoute.js';
 import globalError from './Middleware/errorMiddleware.js';
 
@@ -41,7 +41,7 @@ cloudinary.config({
 app.use('/api/v1/users', userRoute);
 app.use('/api/v1/auth', authRoute);
 app.use('/api/v1/weather', weatherRoute);
-app.use('/api/v1/get-data', qrCodeRoute);
+app.use('/api/v1/get-data', getDataRoute);
 app.use('/api/v1/prayTimes', prayTimes);
 
 app.use(globalError);

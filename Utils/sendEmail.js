@@ -1,6 +1,6 @@
 import nodemailer from 'nodemailer';
 
-const sendEmail = async (email, code) => {
+const sendEmail = async (options) => {
     const transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: {
@@ -11,16 +11,10 @@ const sendEmail = async (email, code) => {
 
     const mailOptions = {
         from: '"Tawaaf App" abdoadimy0@gmail.com', // Sender address
-        to: email, // Recipient address (should be dynamic)
-        subject: 'Password Reset Request',
-        text: `You requested a password reset.`,
-        html: `
-            <p>You requested a password reset.</p>
-            <p>this is your code:</p>
-            <h1>${code}</h1>
-            <p>If you didn't request a password reset, please ignore this email.</p>
-            <p>Thanks!</p>
-        `
+        to: options.email, // Recipient address (should be dynamic)
+        subject: options.subject,
+        text: options.text,
+        html: options.message
     };
 
     await transporter.sendMail(mailOptions);

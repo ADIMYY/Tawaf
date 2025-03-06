@@ -189,8 +189,20 @@ export const forgotPassword = asyncHandler(async (req, res, next) => {
     await user.save();
 
     //! Send the code via email
+    const options = {
+        email: user.email,
+        subject: 'Password Reset Request',
+        text: `You requested a password reset.`,
+        message: `
+            <p>You requested a password reset.</p>
+            <p>this is your code:</p>
+            <h1>${code}</h1>
+            <p>If you didn't request a password reset, please ignore this email.</p>
+            <p>Thanks!</p>
+        `
+    }
     try {
-        await sendEmail(user.email, code);
+        await sendEmail(options);
     } catch (err) {
         user.hashedCode = undefined;
         user.hashedCodeExpires = undefined;

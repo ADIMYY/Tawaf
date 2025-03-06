@@ -1,10 +1,11 @@
 import asyncHandler from "express-async-handler";
 import appError from "../Utils/appError.js";
 import User from "../Model/userModel.js";
+import sendEmail from "../Utils/sendEmail.js";
 
 // Get all users
 export const getAllUsers = asyncHandler(async (req, res, next) => {
-    const users = await User.find({});
+    const users = await User.find({}).select('_id name photo state createdAt approved');
 
     res.status(200).json({
         status: 'success',
@@ -58,6 +59,26 @@ export const deleteUser = asyncHandler(async (req, res, next) => {
 
     if (!user) {
         return next(new appError('No user found with this ID', 404));
+    }
+
+    if (req.user.role !== 'admin') {
+        const options = {
+            email: req.user.email,
+            subject: 'Rejected Massage',
+            text: 'Unfortunately, your request has been rejected. Please sign up again on our website to proceed with updates',
+            message: `
+                <p>Unfortunately, your request has been rejected.</p>
+                <p>Please sign up again on our website to proceed with updates</p>
+                <p>${req.body}</p>
+                <p>Thanks!</p>
+            `,
+        }
+        try {
+            await sendEmail(options);
+        } catch (err) {
+            console.log(err.message);
+            return next(new appError('There is an error in sending email', 500));
+        }
     }
 
     res.status(204).json({
