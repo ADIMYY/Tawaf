@@ -5,11 +5,14 @@ import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import cors from 'cors';
 
+// Routes
 import authRoute from './Routes/authRoute.js';
 import userRoute from './Routes/userRoutes.js';
 import weatherRoute from './Routes/weatherRoute.js';
 import getDataRoute from './Routes/getDataRoute.js';
 import prayTimes from './Routes/prayTimesRoute.js';
+
+// Middleware
 import globalError from './Middleware/errorMiddleware.js';
 import dbConnect from './Config/dataBase.js';
 

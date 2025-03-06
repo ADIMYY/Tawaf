@@ -13,8 +13,21 @@ const dbConnect = async () => {
         await mongoose.connect(db);
     } catch (error) {
         console.error(`Error: ${error.message}`);
-        process.exit(1);
+        
     }
 }
+
+// Graceful shutdown function
+const gracefulShutdown = async () => {
+    try {
+        console.log("Shutting down gracefully...");
+        await mongoose.connection.close(); // Close the database connection
+        console.log("Database connection closed");
+        process.exit(1); // Exit the process after cleanup
+    } catch (shutdownError) {
+        console.error(`Error during shutdown: ${shutdownError.message}`);
+        process.exit(1); // Force exit if cleanup fails
+    }
+};
 
 export default dbConnect;
