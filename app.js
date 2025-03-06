@@ -16,7 +16,6 @@ import prayTimes from './Routes/prayTimesRoute.js';
 
 // Middleware
 import globalError from './Middleware/errorMiddleware.js';
-import dbConnect from './Config/dataBase.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
