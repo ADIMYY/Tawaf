@@ -10,7 +10,7 @@ cloudinary.config({
 const dbConnect = async () => {
     try {
         const db = process.env.DATA_BASE.replace('<db_password>', process.env.DB_PASSWORD);
-        await mongoose.connect(db, { serverSelectionTimeoutMS: 5000 });
+        await mongoose.connect(db);
     } catch (error) {
         console.error(`Error: ${error.message}`);
         process.exit(1); //! 1 means exit
