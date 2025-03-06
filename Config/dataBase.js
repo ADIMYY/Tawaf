@@ -13,19 +13,8 @@ const dbConnect = async () => {
         await mongoose.connect(db, { serverSelectionTimeoutMS: 5000 });
     } catch (error) {
         console.error(`Error: ${error.message}`);
-        
+        process.exit(1); //! 1 means exit
     }
 }
-
-// Graceful shutdown function
-const gracefulShutdown = async () => {
-    try {
-        await mongoose.connection.close();
-        process.exit(1); // Exit the process after cleanup
-    } catch (shutdownError) {
-        console.error(`Error during shutdown: ${shutdownError.message}`);
-        process.exit(1); // Force exit if cleanup fails
-    }
-};
 
 export default dbConnect;
