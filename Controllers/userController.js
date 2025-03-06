@@ -69,7 +69,7 @@ export const deleteUser = asyncHandler(async (req, res, next) => {
             message: `
                 <p>Unfortunately, your request has been rejected.</p>
                 <p>Please sign up again on our website to proceed with updates</p>
-                <p>${req.body}</p>
+                <p>${req.body.massege}</p>
                 <p>Thanks!</p>
             `,
         }
