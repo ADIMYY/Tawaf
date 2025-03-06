@@ -25,7 +25,12 @@ dotenv.config({ path: join(__dirname, 'config.env') });
 
 
 const db = process.env.DATA_BASE.replace('<db_password>', process.env.DB_PASSWORD);
-await mongoose.connect(db);
+try {
+    await mongoose.connect(db)
+} catch (error) {
+    console.log(error.message);
+    process.exit(1);
+}
 cloudinary.config({
     cloud_name: process.env.CLOUD_NAME,
     api_key: process.env.API_KEY,
