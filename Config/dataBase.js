@@ -10,7 +10,7 @@ cloudinary.config({
 const dbConnect = async () => {
     try {
         const db = process.env.DATA_BASE.replace('<db_password>', process.env.DB_PASSWORD);
-        await mongoose.connect(db);
+        await mongoose.connect(db, { serverSelectionTimeoutMS: 5000 });
     } catch (error) {
         console.error(`Error: ${error.message}`);
         
@@ -20,9 +20,7 @@ const dbConnect = async () => {
 // Graceful shutdown function
 const gracefulShutdown = async () => {
     try {
-        console.log("Shutting down gracefully...");
-        await mongoose.connection.close(); // Close the database connection
-        console.log("Database connection closed");
+        await mongoose.connection.close();
         process.exit(1); // Exit the process after cleanup
     } catch (shutdownError) {
         console.error(`Error during shutdown: ${shutdownError.message}`);
