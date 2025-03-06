@@ -55,7 +55,7 @@ export const updateUser = asyncHandler(async (req, res, next) => {
 
 // Delete a user by ID
 export const deleteUser = asyncHandler(async (req, res, next) => {
-    const user = await User.findById(req.params.id);
+    const user = await User.findByIdAndDelete(req.params.id);
 
     if (!user) {
         return next(new appError('No user found with this ID', 404));
@@ -79,13 +79,6 @@ export const deleteUser = asyncHandler(async (req, res, next) => {
             console.log(err.message);
             return next(new appError('There is an error in sending email', 500));
         }
-    }
-
-    try {
-        await user.remove();
-    } catch (error) {
-        console.error(error.message);
-        return next(new appError('There was an error deleting the user', 500));
     }
 
     res.status(204).json({
