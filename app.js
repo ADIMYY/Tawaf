@@ -1,6 +1,4 @@
 import express from 'express';
-import mongoose from 'mongoose';
-import { v2 as cloudinary } from 'cloudinary';
 import dotenv from 'dotenv';
 import morgan from 'morgan';
 import { fileURLToPath } from 'url';
@@ -13,6 +11,7 @@ import weatherRoute from './Routes/weatherRoute.js';
 import getDataRoute from './Routes/getDataRoute.js';
 import prayTimes from './Routes/prayTimesRoute.js';
 import globalError from './Middleware/errorMiddleware.js';
+import dbConnect from './Config/dataBase.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -30,13 +29,8 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 
-const db = process.env.DATA_BASE.replace('<db_password>', process.env.DB_PASSWORD);
-mongoose.connect(db).then(() => console.log('DB connection established'));
-cloudinary.config({
-    cloud_name: process.env.CLOUD_NAME,
-    api_key: process.env.API_KEY,
-    api_secret: process.env.API_SECRET,
-});
+// Connect to MongoDB
+dbConnect();
 
 app.use('/api/v1/users', userRoute);
 app.use('/api/v1/auth', authRoute);
