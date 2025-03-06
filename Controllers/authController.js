@@ -1,7 +1,4 @@
 import crypto from 'crypto';
-import fs from 'fs';
-import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
 
 import sharp from 'sharp';
 import { v4 as uuidv4 } from 'uuid';
@@ -57,7 +54,7 @@ export const resizeImage = asyncHandler(async (req, res, next) => {
 async function generateQrcode(user) {
     try {
         const fileName = `${user._id}.png`;
-        const url = `tawaf-isp4-git-master-adimys-projects.vercel.app/api/v1/get-data/Qrcode?id=${user._id}`;
+        const url = `https://tawaf-isp4-git-master-adimys-projects.vercel.app/api/v1/get-data/Qrcode?id=${user._id}`;
 
         // Generate QR code as a buffer
         const qrBuffer = await QRCode.toBuffer(url);
