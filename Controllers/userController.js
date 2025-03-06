@@ -55,7 +55,7 @@ export const updateUser = asyncHandler(async (req, res, next) => {
 
 // Delete a user by ID
 export const deleteUser = asyncHandler(async (req, res, next) => {
-    const user = await User.findByIdAndDelete(req.params.id);
+    const user = await User.findById(req.params.id);
 
     if (!user) {
         return next(new appError('No user found with this ID', 404));
@@ -63,13 +63,13 @@ export const deleteUser = asyncHandler(async (req, res, next) => {
 
     if (req.user.role === 'admin') {
         const options = {
-            email: req.user.email,
-            subject: 'Rejected Massage',
+            email: user.email,
+            subject: 'Rejection Email',
             text: 'Unfortunately, your request has been rejected. Please sign up again on our website to proceed with updates',
             message: `
                 <p>Unfortunately, your request has been rejected.</p>
                 <p>Please sign up again on our website to proceed with updates</p>
-                <p>${req.body.massege}</p>
+                <p>${req.body.massege || ''}</p>
                 <p>Thanks!</p>
             `,
         }
@@ -79,6 +79,13 @@ export const deleteUser = asyncHandler(async (req, res, next) => {
             console.log(err.message);
             return next(new appError('There is an error in sending email', 500));
         }
+    }
+
+    try {
+        await sendEmail(emailOptions);
+    } catch (error) {
+        console.error(error.message);
+        return next(new appError('There was an error sending the email', 500));
     }
 
     res.status(204).json({
