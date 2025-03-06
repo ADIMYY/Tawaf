@@ -82,10 +82,10 @@ export const deleteUser = asyncHandler(async (req, res, next) => {
     }
 
     try {
-        await sendEmail(emailOptions);
+        await user.remove();
     } catch (error) {
         console.error(error.message);
-        return next(new appError('There was an error sending the email', 500));
+        return next(new appError('There was an error deleting the user', 500));
     }
 
     res.status(204).json({
