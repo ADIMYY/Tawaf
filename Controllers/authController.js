@@ -91,7 +91,12 @@ export const signup = asyncHandler(async (req, res, next) => {
         user.qrcode = qrcodeUrl;
         await user.save();
 
-        res.status(201).json({ status: 'success', data: user, token });
+        res.status(201).json({
+            status: 'success',
+            id: user._id,
+            approved: user.approved,
+            token,
+        });
     } catch (error) {
         console.error('Error in signup process:', error);
         return next(new appError('Error in signup process', 500));
@@ -101,7 +106,7 @@ export const signup = asyncHandler(async (req, res, next) => {
 
 export const login = asyncHandler(async (req, res, next) => {
     const { email, password } = req.body;
-    const user = await User.findOne({ email }).select('+password');
+    const user = await User.findOne({ email }).select('+password _id approved');
 
     if (!user || !(await bcrypt.compare(password, user.password))) {
         return next(new appError('Incorrect email or password', 401));

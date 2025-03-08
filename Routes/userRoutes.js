@@ -3,7 +3,6 @@ import express from 'express';
 import { 
     getAllUsers,
     getUser,
-    createUser,
     updateUser,
     deleteUser,
 } from '../Controllers/userController.js';
@@ -14,10 +13,7 @@ const router = express.Router();
 router.use(protect);
 
 router.route('/myProfile').get(getUser);
-router
-    .route('/')
-    .get(restrictTo('admin'), getAllUsers)
-    .post(restrictTo('admin'), createUser);
+router.route('/').get(restrictTo('admin'), getAllUsers);
 
 router
     .route('/:id')

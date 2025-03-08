@@ -5,22 +5,12 @@ import sendEmail from "../Utils/sendEmail.js";
 
 // Get all users
 export const getAllUsers = asyncHandler(async (req, res, next) => {
-    const users = await User.find({}).select('_id name photo state createdAt approved');
+    const users = await User.find({}).select('_id name photo state updatedAt approved');
 
     res.status(200).json({
         status: 'success',
         result: users.length,
         data: users,
-    });
-});
-
-// Create a new user
-export const createUser = asyncHandler(async (req, res, next) => {
-    const user = await User.create(req.body);
-
-    res.status(201).json({
-        status: 'success',
-        data: user,
     });
 });
 
