@@ -94,7 +94,6 @@ export const signup = asyncHandler(async (req, res, next) => {
         res.status(201).json({
             status: 'success',
             id: user._id,
-            approved: user.approved,
             token,
         });
     } catch (error) {
