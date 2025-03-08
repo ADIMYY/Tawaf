@@ -99,7 +99,15 @@ const userSchema = new mongoose.Schema(
             required: function() { return this.company === true },
         },
         companyNumber: String,
-        qrcode: String
+        qrcode: String,
+        alive: {
+            type: Boolean,
+            default: true,
+        },
+        location: {
+            type: String,
+            required: "",
+        }
     }, { timestamps: true }
 );
 
