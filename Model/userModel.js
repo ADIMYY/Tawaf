@@ -49,7 +49,11 @@ const userSchema = new mongoose.Schema(
             enum: ['user', 'admin'],
             default: 'user',
         },
-        approved: String,
+        approved: {
+            type: string,
+            enum: ['pending', 'approved', 'rejected'],
+            default: 'pending',
+        },
         passwordChangeAt: Date,
         gender: {
             type: String,
