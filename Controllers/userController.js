@@ -51,7 +51,7 @@ export const deleteUser = asyncHandler(async (req, res, next) => {
         return next(new appError('No user found with this ID', 404));
     }
 
-    if (req.user.role === 'admin') {
+    if (req.user.role === 'admin' && req.user._id.toString() !== req.params.id) {
         const options = {
             email: user.email,
             subject: 'Rejection Email',

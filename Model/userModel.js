@@ -50,9 +50,8 @@ const userSchema = new mongoose.Schema(
             default: 'user',
         },
         approved: {
-            type: String,
-            enum: ['pending', 'approved', 'rejected'],
-            default: 'pending',
+            type: Boolean,
+            default: false,
         },
         passwordChangeAt: Date,
         gender: {
