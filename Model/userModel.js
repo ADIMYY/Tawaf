@@ -50,7 +50,7 @@ const userSchema = new mongoose.Schema(
             default: 'user',
         },
         approved: {
-            type: string,
+            type: String,
             enum: ['pending', 'approved', 'rejected'],
             default: 'pending',
         },
