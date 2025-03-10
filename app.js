@@ -53,11 +53,11 @@ const limiter = rateLimit({
     max: 100,
     message: 'Too many requests from this IP, please try again in an hour',
 });
-
+app.use('/api', limiter);
 
 app.use('/api/v1/users', userRoute);
 app.use('/api/v1/auth', authRoute);
-app.use('/api/v1/weather', weatherRoute, limiter);
+app.use('/api/v1/weather', weatherRoute);
 app.use('/api/v1/get-data', getDataRoute);
 app.use('/api/v1/prayTimes', prayTimes);
 
