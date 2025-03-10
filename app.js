@@ -6,6 +6,7 @@ import { v2 as cloudinary } from 'cloudinary';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import cors from 'cors';
+import { rateLimit } from 'express-rate-limit';
 
 // Routes
 import authRoute from './Routes/authRoute.js';
@@ -46,6 +47,13 @@ app.use(express.json());
 if (process.env.NODE_ENV === 'development') {
     app.use(morgan('dev'));
 }
+
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 100,
+    message: 'Too many requests from this IP, please try again in an hour',
+});
+app.use('/api', limiter);
 
 
 app.use('/api/v1/users', userRoute);
