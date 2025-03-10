@@ -114,7 +114,7 @@ const weatherClient = {
 export const getWeather = asyncHandler(async (req, res, next) => {
     try {
         // Extract latitude and longitude from request body
-        const { lat, lon } = req.body;
+        const { lat, lon } = req.params;
 
         // Validate the coordinates
         if (!lat || !lon) {

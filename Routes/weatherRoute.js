@@ -5,6 +5,6 @@ import { protect } from '../Controllers/authController.js';
 
 const router = express.Router();
 
-router.route('/').get(protect, getWeather);
+router.route('/:lat/:lon').get(protect, getWeather);
 
 export default router;
