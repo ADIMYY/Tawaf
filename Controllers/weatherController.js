@@ -28,6 +28,9 @@ const formatters = {
     }
 };
 
+// Cache for weather data
+const cache = {};
+
 // API client
 const weatherClient = {
     headers: {
@@ -94,32 +97,43 @@ const weatherClient = {
         });
     },
 
-    // Helper function to fetch weather data
+    // Helper function to fetch weather data with retry logic
     async fetchWeatherData(lat, lon, params) {
-        const response = await axios.get(TOMORROW_API_CONFIG.BASE_URL, {
-            params: {
-                location: `${lat},${lon}`,
-                apikey: TOMORROW_API_CONFIG.API_KEY,
-                units: 'metric',
-                ...params
-            },
-            headers: this.headers
-        });
+        const retryFetch = async (retries = 3, delay = 1000) => {
+            try {
+                const response = await axios.get(TOMORROW_API_CONFIG.BASE_URL, {
+                    params: {
+                        location: `${lat},${lon}`,
+                        apikey: TOMORROW_API_CONFIG.API_KEY,
+                        units: 'metric',
+                        ...params
+                    },
+                    headers: this.headers
+                });
+                return response.data;
+            } catch (error) {
+                if (retries > 0 && error.response?.status === 429) {
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                    return retryFetch(retries - 1, delay * 2);
+                }
+                throw error;
+            }
+        };
 
-        return response.data;
+        return retryFetch();
     }
 };
 
 // Controller to get weather data
 export const getWeather = asyncHandler(async (req, res, next) => {
     try {
-        // Extract latitude and longitude from request body
+        // Extract latitude and longitude from request parameters
         const { lat, lon } = req.params;
 
         // Validate the coordinates
         if (!lat || !lon) {
             return res.status(400).json({
-                error: 'Latitude and longitude are required in the request body'
+                error: 'Latitude and longitude are required in the request parameters'
             });
         }
 
@@ -139,21 +153,40 @@ export const getWeather = asyncHandler(async (req, res, next) => {
             });
         }
 
+        // Check cache
+        const cacheKey = `${latitude},${longitude}`;
+        if (cache[cacheKey] && Date.now() - cache[cacheKey].timestamp < 10 * 60 * 1000) {
+            return res.status(200).json(cache[cacheKey].data);
+        }
+
+        // Fetch weather data
         const [current, dailyTemperatures] = await Promise.all([
             weatherClient.getCurrentWeather(latitude, longitude),
             weatherClient.getWeatherForecast(latitude, longitude)
         ]);
 
-        res.status(200).json({
-            location: {
-                lat: latitude,
-                lon: longitude
-            },
+        const responseData = {
+            location: { lat: latitude, lon: longitude },
             current,
             dailyTemperatures
-        });
+        };
+
+        // Update cache
+        cache[cacheKey] = {
+            timestamp: Date.now(),
+            data: responseData
+        };
+
+        res.status(200).json(responseData);
     } catch (error) {
         console.error('Weather API Error:', error.response?.data || error.message);
+
+        if (error.response?.status === 429) {
+            return res.status(429).json({
+                error: 'Rate limit exceeded. Please try again later.'
+            });
+        }
+
         res.status(500).json({
             error: 'Failed to fetch weather data',
             details: error.response?.data || error.message
