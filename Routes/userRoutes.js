@@ -13,6 +13,7 @@ const router = express.Router();
 router.use(protect);
 
 router.route('/myProfile').get(getUser);
+router.route('/updateMyProfile').put(updateUser);
 router.route('/').get(restrictTo('admin'), getAllUsers);
 
 router

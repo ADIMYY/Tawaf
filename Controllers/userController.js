@@ -14,9 +14,9 @@ export const getAllUsers = asyncHandler(async (req, res, next) => {
     });
 });
 
-// Get a single user by ID or logged-in user if no ID is provided
+//* Get a single user by ID or logged-in user if no ID is provided
 export const getUser = asyncHandler(async (req, res, next) => {
-    const userId = req.params.id || req.user._id; // Use logged-in user ID if no ID is provided
+    const userId = req.params.id || req.user._id; //* Use logged-in user ID if no ID is provided
     const user = await User.findById(userId);
 
     if (!user) {
@@ -29,21 +29,35 @@ export const getUser = asyncHandler(async (req, res, next) => {
     });
 });
 
-// Update a user by ID
+//* Update a user by ID
 export const updateUser = asyncHandler(async (req, res, next) => {
-    const user = await User.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const id = req.params.id || req.user._id; //* Use logged-in user ID if no ID is provided
+
+    //* Prepare the update data
+    const updateData = { ...req.body };
+
+    //* Manually replicate the pre('save') middleware logic
+    if (updateData.medicinesName !== undefined) {
+        updateData.medicine = !!updateData.medicinesName; //* Set medicine to true if medicinesName exists
+    }
+    if (updateData.myDiseases !== undefined) {
+        updateData.sick = !!updateData.myDiseases; //* Set sick to true if myDiseases exists
+    }
+    if (updateData.companyName !== undefined) {
+        updateData.company = !!updateData.companyName; //* Set company to true if companyName exists
+    }
+
+    //* Update the user
+    const user = await User.findByIdAndUpdate(id, updateData, { new: true, runValidators: true });
 
     if (!user) {
         return next(new appError('No user found with this ID', 404));
     }
 
-    res.status(200).json({
-        status: 'success',
-        data: user,
-    });
+    res.status(200).json({ status: 'success', data: user, });
 });
 
-// Delete a user by ID
+//* Delete a user by ID
 export const deleteUser = asyncHandler(async (req, res, next) => {
     const user = await User.findByIdAndDelete(req.params.id);
 
