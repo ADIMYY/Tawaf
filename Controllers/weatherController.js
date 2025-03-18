@@ -15,14 +15,27 @@ const TOMORROW_API_CONFIG = {
 const formatters = {
     windSpeed: (speedInMS) => (speedInMS * 3.6).toFixed(1),
     percentage: (value) => parseFloat(value).toFixed(1),
-    time: (isoString) => {
+    time: (isoString, lat, lon) => {
         if (!isoString) return null;
+        
         try {
             const date = new Date(isoString);
             if (isNaN(date.getTime())) return null;
-            return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+
+            const timezoneOffset = Math.round(lon / 15);
+
+            const utcHours = date.getUTCHours();
+            const utcMinutes = date.getUTCMinutes();
+
+            const localHours = (utcHours + timezoneOffset) % 24;
+
+            const period = localHours < 12 ? 'AM' : 'PM';
+            const hours12 = localHours % 12 || 12;
+            const minutes = utcMinutes.toString().padStart(2, '0');
+
+            return `${hours12}:${minutes} ${period}`;
         } catch (error) {
-            console.error('Error formatting time:', error);
+            console.error('Error formatting time:', error.message);
             return null;
         }
     }
@@ -60,8 +73,8 @@ const weatherClient = {
             windSpeed: formatters.windSpeed(minutelyData.windSpeed),
             humidity: formatters.percentage(minutelyData.humidity),
             rainChance: formatters.percentage(minutelyData.precipitationProbability),
-            sunrise: formatters.time(dailyData.sunriseTime),
-            sunset: formatters.time(dailyData.sunsetTime)
+            sunrise: formatters.time(dailyData.sunriseTime, lat, lon),
+            sunset: formatters.time(dailyData.sunsetTime, lat, lon)
         };
     },
 
