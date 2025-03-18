@@ -47,8 +47,8 @@ export const updateUser = asyncHandler(async (req, res, next) => {
         updateData.company = !!updateData.companyName; //* Set company to true if companyName exists
     }
 
-    //* Update the user
-    const user = await User.findByIdAndUpdate(id, updateData, { new: true, runValidators: true });
+    //* Get the user and update
+    const user = await User.findByIdAndUpdate(id, updateData, { new: true });
 
     if (!user) {
         return next(new appError('No user found with this ID', 404));
