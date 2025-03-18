@@ -311,26 +311,22 @@ export const getWeather = asyncHandler(async (req, res, next) => {
             weatherClient.getDayPartTemperatures(latitude, longitude)
         ]);
 
-        // Add day part temperatures to each day in the forecast
-        dailyTemperatures.forEach(day => {
-            const dateObj = new Date(day.date);
-            // Format to match the YYYY-MM-DD key in dayPartTemps
-            const dayKey = dateObj.toISOString().split('T')[0];
-            
-            if (dayPartTemps[dayKey]) {
-                day.dayPartTemperatures = {
-                    morning: dayPartTemps[dayKey].morning.avg,
-                    afternoon: dayPartTemps[dayKey].afternoon.avg,
-                    evening: dayPartTemps[dayKey].evening.avg,
-                    night: dayPartTemps[dayKey].night.avg
-                };
-            }
-        });
+        // Get today's date formatted as YYYY-MM-DD
+        const today = new Date().toISOString().split('T')[0];
+        
+        // Extract only current day's temperatures from dayPartTemps
+        const currentDayTemps = dayPartTemps[today] || {};
 
         const responseData = {
             location: { lat: latitude, lon: longitude },
             current,
-            dailyTemperatures
+            dailyTemperatures,
+            currentDayTemperatures: {
+                morning: currentDayTemps.morning?.avg || null,
+                afternoon: currentDayTemps.afternoon?.avg || null,
+                evening: currentDayTemps.evening?.avg || null,
+                night: currentDayTemps.night?.avg || null
+            }
         };
 
         // Update cache
