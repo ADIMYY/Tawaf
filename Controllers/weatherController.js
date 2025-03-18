@@ -187,6 +187,50 @@ const weatherClient = {
         });
     },
 
+    // Fetch hourly forecast for today to fill in missing day parts
+    async getHourlyForecastForToday(lat, lon) {
+        const response = await this.fetchWeatherData(lat, lon, {
+            timesteps: '1h',
+            startTime: 'now',
+            endTime: 'nowPlus1d',
+            fields: ['temperature']
+        });
+
+        if (!response.timelines?.hourly || response.timelines.hourly.length === 0) {
+            throw new Error('Hourly forecast data not found in response');
+        }
+
+        const dayPartForecasts = {
+            morning: [],
+            afternoon: [],
+            evening: [],
+            night: []
+        };
+
+        response.timelines.hourly.forEach(hour => {
+            const date = new Date(hour.time);
+            
+            // Calculate local hour
+            const utcHour = date.getUTCHours();
+            const timezoneOffset = Math.round(lon / 15);
+            const localHour = (utcHour + timezoneOffset + 24) % 24;
+            
+            const dayPart = getDayPart(localHour);
+            dayPartForecasts[dayPart].push(hour.values.temperature);
+        });
+
+        // Calculate averages for each day part from forecast
+        const result = {};
+        Object.keys(dayPartForecasts).forEach(part => {
+            const temps = dayPartForecasts[part];
+            result[part] = temps.length > 0 
+                ? parseFloat((temps.reduce((sum, temp) => sum + temp, 0) / temps.length).toFixed(1))
+                : null;
+        });
+
+        return result;
+    },
+
     // Fetch day part temperatures (morning, afternoon, evening, night)
     async getDayPartTemperatures(lat, lon) {
         const response = await this.fetchWeatherData(lat, lon, {
@@ -305,10 +349,11 @@ export const getWeather = asyncHandler(async (req, res, next) => {
         }
 
         // Fetch weather data
-        const [current, dailyTemperatures, dayPartTemps] = await Promise.all([
+        const [current, dailyTemperatures, dayPartTemps, hourlyForecasts] = await Promise.all([
             weatherClient.getCurrentWeather(latitude, longitude),
             weatherClient.getWeatherForecast(latitude, longitude),
-            weatherClient.getDayPartTemperatures(latitude, longitude)
+            weatherClient.getDayPartTemperatures(latitude, longitude),
+            weatherClient.getHourlyForecastForToday(latitude, longitude)
         ]);
 
         // Get today's date formatted as YYYY-MM-DD
@@ -316,17 +361,20 @@ export const getWeather = asyncHandler(async (req, res, next) => {
         
         // Extract only current day's temperatures from dayPartTemps
         const currentDayTemps = dayPartTemps[today] || {};
+        
+        // Combine actual recorded temperatures with forecast temperatures for missing parts
+        const currentDayTemperatures = {
+            morning: currentDayTemps.morning?.avg || hourlyForecasts.morning || dailyTemperatures[0]?.temperature?.avg || null,
+            afternoon: currentDayTemps.afternoon?.avg || hourlyForecasts.afternoon || dailyTemperatures[0]?.temperature?.avg || null,
+            evening: currentDayTemps.evening?.avg || hourlyForecasts.evening || dailyTemperatures[0]?.temperature?.avg || null,
+            night: currentDayTemps.night?.avg || hourlyForecasts.night || dailyTemperatures[0]?.temperature?.avg || null
+        };
 
         const responseData = {
             location: { lat: latitude, lon: longitude },
             current,
             dailyTemperatures,
-            currentDayTemperatures: {
-                morning: currentDayTemps.morning?.avg || null,
-                afternoon: currentDayTemps.afternoon?.avg || null,
-                evening: currentDayTemps.evening?.avg || null,
-                night: currentDayTemps.night?.avg || null
-            }
+            currentDayTemperatures
         };
 
         // Update cache
