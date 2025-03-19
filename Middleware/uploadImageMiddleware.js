@@ -18,4 +18,4 @@ const multerOptions = () => {
     return upload;
 }
 
-export const uploadSingleImage = (fileName) => multerOptions().single(fileName);
+export const uploadMixImage = (arrayFields) => multerOptions().fields(arrayFields);

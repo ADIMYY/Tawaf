@@ -6,7 +6,7 @@ import {
     forgotPassword,
     verifyResetCodePassword,
     resetPassword,
-    uploadUserImage,
+    uploadImages,
     resizeImage,
 } from '../Controllers/authController.js';
 
@@ -14,7 +14,7 @@ import { signupValidator, loginValidator } from '../Utils/validator/authValidati
 
 const router = express.Router();
 
-router.route('/signup').post(uploadUserImage, resizeImage, signupValidator , signup);
+router.route('/signup').post(uploadImages, resizeImage, signupValidator , signup);
 router.post('/login', loginValidator , login);
 router.post('/forgotPassword', forgotPassword);
 router.post('/verifyResetCode', verifyResetCodePassword);

@@ -110,6 +110,10 @@ const userSchema = new mongoose.Schema(
         location: {
             type: String,
             default: "",
+        },
+        visa: {
+            type: String,
+            required: true,
         }
     }, { timestamps: true }
 );

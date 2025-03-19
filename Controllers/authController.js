@@ -11,32 +11,62 @@ import QRCode from 'qrcode';
 import User from '../Model/userModel.js';
 import appError from '../Utils/appError.js';
 import sendEmail from '../Utils/sendEmail.js';
-import { uploadSingleImage } from '../Middleware/uploadImageMiddleware.js';
+import { uploadMixImage } from '../Middleware/uploadImageMiddleware.js';
 import generateToken from '../Utils/generateToken.js';
 
-export const uploadUserImage = uploadSingleImage('photo');
+export const uploadImages = uploadMixImage([
+    { name: 'photo', maxCount: 1, },
+    { name: 'visa', maxCount: 1 }
+]);
 
 export const resizeImage = asyncHandler(async (req, res, next) => {
-    const id = uuidv4();
-
-    if (!req.file) {
-        console.log('No file received');
+    if (!req.file && !req.files) {
+        console.log('No files to resize');
         return next();
     }
 
-    // Resize image in memory and get buffer
-    const resizedBuffer = await sharp(req.file.buffer)
-        .resize(600, 600)
-        .toFormat('jpeg')
-        .jpeg({ quality: 90 })
-        .toBuffer();
+    try {
+        if (req.file) {
+            await processAndUploadImage(req.file, 'photo', req);
+        } else if (req.files) {
+            for (const [fileName, files] of Object.entries(req.files)) {
+                await processAndUploadImage(files[0], fileName, req);
+            }
+        }
+        next();
+    } catch (error) {
+        console.error('Error in resizing image:', error.message);
+        return next(new appError('Error in resizing image', 500));
+    }
+});
 
-    // Upload directly from buffer to Cloudinary
-    const photoUrl = await new Promise((resolve, reject) => {
+
+async function processAndUploadImage(file, fieldName, req) {
+    const id = uuidv4();
+
+    const resizeConfig = {
+        photo : {  width: 600, height: 600, quality: 90, folder: 'profiles' },
+        visa: { width: 800, height: null, quality: 80, folder: 'visas' }
+    };
+
+    const config = resizeConfig[fieldName] || resizeConfig.photo;
+
+    let sharpInstance = sharp(file.buffer).toFormat('jpeg').jpeg({ quality: config.quality });
+
+    if (config.width || config.height) {
+        sharpInstance = sharpInstance.resize(config.width, config.height, {
+            fit: 'inside',
+            withoutEnlargement: true,
+        });
+    }
+
+    const resizedBuffer = await sharpInstance.toBuffer();
+
+    const uploadResult = await new Promise((resolve, reject) => {
         const stream = cloudinary.uploader.upload_stream(
             {
-                folder: 'profiles',
-                public_id: id,
+                folder: config.folder,
+                public_id: `${fieldName}-${id}`,
             },
             (error, result) => {
                 if (error) reject(error);
@@ -46,9 +76,9 @@ export const resizeImage = asyncHandler(async (req, res, next) => {
         stream.end(resizedBuffer);
     });
 
-    req.body.photo = photoUrl.secure_url;
-    next();
-});
+    if (!req.body) req.body = {}; // Ensure req.body exists
+    req.body[fieldName] = uploadResult.secure_url;
+}
 
 
 async function generateQrcode(user) {
