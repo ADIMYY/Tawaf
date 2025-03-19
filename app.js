@@ -51,9 +51,9 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 const limiter = rateLimit({
-    windowMs: 60 * 1000, // 1 minute
-    max: 100,
-    message: 'Too many requests from this IP, please try again in an hour',
+    windowMs: 5 * 60 * 1000, // 15 minutes
+    max: 500, // Allow 300 requests every 15 minutes
+    message: 'Too many requests from this IP, please try again in 15 minutes',
 });
 app.use('/api', limiter);
 

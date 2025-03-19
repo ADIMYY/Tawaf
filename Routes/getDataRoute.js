@@ -5,6 +5,6 @@ import { getDataFromQrcode, getDataFromPassport } from '../Controllers/getDataCo
 const router = express.Router();
 
 router.get('/Qrcode', getDataFromQrcode);
-router.get('/', getDataFromPassport);
+router.get('/:passport', getDataFromPassport);
 
 export default router;

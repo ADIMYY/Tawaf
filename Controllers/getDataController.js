@@ -276,14 +276,14 @@ const getProfileTemplate = (user) => `
         </html>`;
 
 export const getDataFromPassport = asyncHandler(async (req, res, next) => {
-    const user = await User.findOne({ passPortNumber: req.body.passPort });
+    const user = await User.findOne({ passPortNumber: req.params.passport });
 
     if (!user) {
         return next(new appError('No user with passport number', 500));
     }
 
     res.status(200).send(getProfileTemplate(user));
-})
+});
 
 export const getDataFromQrcode = asyncHandler(async (req, res, next) => {
     const { id } = req.query;
