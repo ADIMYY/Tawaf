@@ -38,7 +38,6 @@ export const getPrayTimes = asyncHandler(async (req, res, next) => {
         // Format prayer times for response with the correct timezone
         const formattedPrayerTimes = {
             fajr: formatTime(prayerTimes.fajr, timeZone),
-            sunrise: formatTime(prayerTimes.sunrise, timeZone),
             dhuhr: formatTime(prayerTimes.dhuhr, timeZone),
             asr: formatTime(prayerTimes.asr, timeZone),
             maghrib: formatTime(prayerTimes.maghrib, timeZone),
@@ -49,7 +48,6 @@ export const getPrayTimes = asyncHandler(async (req, res, next) => {
         res.status(200).json({
             status: 'success',
             data: {
-                timeZone,
                 prayerTimes: formattedPrayerTimes,
             },
         });
