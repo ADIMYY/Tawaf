@@ -62,7 +62,6 @@ const userSchema = new mongoose.Schema(
         userPhone: {
             type: String,
             required: true,
-            match: [/^\d{11}$/, 'Please enter a valid phone number'],
         },
         maritalStatus: {
             type: String,
