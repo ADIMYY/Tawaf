@@ -135,7 +135,7 @@ export const signup = asyncHandler(async (req, res, next) => {
 
 export const login = asyncHandler(async (req, res, next) => {
     const { email, password } = req.body;
-    const user = await User.findOne({ email }).select('+password _id approved');
+    const user = await User.findOne({ email }).select('+password _id approved name');
 
     if (!user || !(await bcrypt.compare(password, user.password))) {
         return next(new appError('Incorrect email or password', 401));
