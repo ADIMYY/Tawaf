@@ -11,8 +11,7 @@ A Node.js application built with Express.js framework.
 ├── Middleware/     # Custom middleware functions
 ├── Utils/          # Utility functions and helpers
 ├── app.js          # Main application entry point
-├── package.json    # Project dependencies and scripts
-└── vercel.json     # Vercel deployment configuration
+└── package.json    # Project dependencies and scripts
 ```
 
 ## Prerequisites
