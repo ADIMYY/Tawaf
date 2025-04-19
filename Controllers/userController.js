@@ -81,9 +81,10 @@ export const deleteUser = asyncHandler(async (req, res, next) => {
         <p>Your account has been deleted from our system.</p>
     `;
 
-    if (user.visaExpiryDate >= new Date()) {
+    const visaExpiryDate = new Date(user.visaExpiryDate);
+    if (visaExpiryDate <= new Date()) {
         emailMessage += `
-            <p>Your visa will expired on ${user.visaExpiryDate}.</p>
+            <p>Your visa expired on ${user.visaExpiryDate}.</p>
         `;
     }
 
