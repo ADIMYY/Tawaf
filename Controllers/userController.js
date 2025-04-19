@@ -59,34 +59,63 @@ export const updateUser = asyncHandler(async (req, res, next) => {
 
 //* Delete a user by ID
 export const deleteUser = asyncHandler(async (req, res, next) => {
-    const user = await User.findByIdAndDelete(req.params.id);
-
+    // Check if user exists
+    const user = await User.findById(req.params.id);
     if (!user) {
         return next(new appError('No user found with this ID', 404));
     }
 
-    if (req.user.role === 'admin' && req.user._id.toString() !== req.params.id) {
-        const options = {
-            email: user.email,
-            subject: 'Rejection Email',
-            text: 'Unfortunately, your request has been rejected. Please sign up again on our website to proceed with updates',
-            message: `
-                <p>Unfortunately, your request has been rejected.</p>
-                <p>Please sign up again on our website to proceed with updates</p>
-                <p>${req.body.massege || ''}</p>
-                <p>Thanks!</p>
-            `,
-        }
-        try {
-            await sendEmail(options);
-        } catch (err) {
-            console.log(err.message);
-            return next(new appError('There is an error in sending email', 500));
-        }
+    // Check if user is trying to delete their own account
+    if (req.user._id.toString() === req.params.id) {
+        return next(new appError('You cannot delete your own account. Please contact an administrator.', 403));
     }
 
-    res.status(204).json({
+    // Check if the requesting user has admin privileges
+    if (req.user.role !== 'admin') {
+        return next(new appError('You do not have permission to delete users', 403));
+    }
+
+    // Prepare email message based on user data
+    let emailMessage = `
+        <p>Dear ${user.name},</p>
+        <p>Your account has been deleted from our system.</p>
+    `;
+
+    if (user.visaExpiryDate >= new Date()) {
+        emailMessage += `
+            <p>Your visa will expired on ${user.visaExpiryDate}.</p>
+        `;
+    }
+
+    if (req.body.message) {
+        emailMessage += `
+            <p>Additional information: ${req.body.message}</p>
+        `;
+    }
+
+    emailMessage += `
+        <p>If you believe this was a mistake, please contact our support team.</p>
+        <p>Best regards,<br>The Tawaf Team</p>
+    `;
+
+    // Send email notification
+    try {
+        await sendEmail({
+            email: user.email,
+            subject: 'Account Deletion Notice',
+            text: 'Your account has been deleted from our system.',
+            message: emailMessage
+        });
+    } catch (err) {
+        console.error('Error sending deletion email:', err);
+        // Continue with deletion even if email fails
+    }
+
+    // Delete the user
+    await User.findByIdAndDelete(req.params.id);
+
+    res.status(200).json({
         status: 'success',
-        message: 'User deleted successfully',
+        message: 'User has been successfully deleted'
     });
 });

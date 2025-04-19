@@ -113,7 +113,11 @@ const userSchema = new mongoose.Schema(
         visa: {
             type: String,
             required: true,
-        }
+        },
+        visaExpiryDate: {
+            type: Date,
+            default: "",
+        },
     }, { timestamps: true }
 );
 
