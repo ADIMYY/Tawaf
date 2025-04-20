@@ -59,69 +59,67 @@ export const updateUser = asyncHandler(async (req, res, next) => {
 
 //* Delete a user by ID
 export const deleteUser = asyncHandler(async (req, res, next) => {
-    // Check if user exists
-    const user = await User.findById(req.params.id);
+    // Find and delete the user in one operation
+    const user = await User.findByIdAndDelete(req.params.id);
+    
+    // Check if user existed
     if (!user) {
         return next(new appError('No user found with this ID', 404));
     }
 
-    // Check if user is trying to delete their own account
-    if (req.user._id.toString() === req.params.id) {
-        return next(new appError('You cannot delete your own account. Please contact an administrator.', 403));
-    }
-
     // Check if the requesting user has admin privileges
-    if (req.user.role !== 'admin') {
-        return next(new appError('You do not have permission to delete users', 403));
-    }
-
-    // Prepare email message based on user data
-    let emailMessage = `
-        <p>Dear ${user.name},</p>
-        <p>Your account has been deleted from our system.</p>
-    `;
-
-    if (user.visaExpiryDate) {
-        const visaExpiryDate = new Date(user.visaExpiryDate);
-        if (!isNaN(visaExpiryDate.getTime())) {  // Check if date is valid
-            if (visaExpiryDate <= new Date()) {
-                emailMessage += `
-                    <p>Your visa expired on ${user.visaExpiryDate}.</p>
-                `;
-            } else {
-                emailMessage += `
-                    <p>Your visa will expire on ${user.visaExpiryDate}.</p>
-                `;
+    if (req.user.role === 'admin') {
+        // Prepare email message based on user data
+        let emailMessage = `
+            <p>Dear ${user.name},</p>
+            <p>Your account has been deleted from our system.</p>
+        `;
+    
+        if (user.visaExpiryDate) {
+            const visaExpiryDate = new Date(user.visaExpiryDate);
+            if (!isNaN(visaExpiryDate.getTime())) {  // Check if date is valid
+                const formattedDate = visaExpiryDate.toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+                
+                if (visaExpiryDate <= new Date()) {
+                    emailMessage += `
+                        <p>Your visa expired on ${formattedDate}.</p>
+                    `;
+                } else {
+                    emailMessage += `
+                        <p>Your visa will expire on ${formattedDate}.</p>
+                    `;
+                }
             }
         }
-    }
-
-    if (req.body.message) {
+    
+        if (req.body.message) {
+            emailMessage += `
+                <p>Additional information: ${req.body.message}</p>
+            `;
+        }
+    
         emailMessage += `
-            <p>Additional information: ${req.body.message}</p>
+            <p>If you believe this was a mistake, please contact our support team.</p>
+            <p>Best regards,<br>The Tawaf Team</p>
         `;
+    
+        // Send email notification
+        try {
+            await sendEmail({
+                email: user.email,
+                subject: 'Account Deletion Notice',
+                text: 'Your account has been deleted from our system.',
+                message: emailMessage
+            });
+        } catch (err) {
+            console.error('Error sending deletion email:', err);
+            // Continue with deletion even if email fails
+        }
     }
-
-    emailMessage += `
-        <p>If you believe this was a mistake, please contact our support team.</p>
-        <p>Best regards,<br>The Tawaf Team</p>
-    `;
-
-    // Send email notification
-    try {
-        await sendEmail({
-            email: user.email,
-            subject: 'Account Deletion Notice',
-            text: 'Your account has been deleted from our system.',
-            message: emailMessage
-        });
-    } catch (err) {
-        console.error('Error sending deletion email:', err);
-        // Continue with deletion even if email fails
-    }
-
-    // Delete the user
-    await User.findByIdAndDelete(req.params.id);
 
     res.status(200).json({
         status: 'success',
