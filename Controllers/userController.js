@@ -100,6 +100,16 @@ export const deleteUser = asyncHandler(async (req, res, next) => {
                 await cloudinary.uploader.destroy(visaPublicId);
             }
         }
+
+
+        // Delete Qr code
+        if (user.qrcode) {
+            const qrCodePublicId = getPublicIdFromUrl(user.qrcode);
+            console.log(qrCodePublicId);
+            if (qrCodePublicId) {
+                await cloudinary.uploader.destroy(qrCodePublicId);
+            }
+        }
     } catch (error) {
         console.error('Error deleting images from Cloudinary:', error);
         // Continue with user deletion even if image deletion fails
