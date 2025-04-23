@@ -7,9 +7,14 @@ import { v2 as cloudinary } from 'cloudinary';
 // Utility function to extract public_id from Cloudinary URL
 const getPublicIdFromUrl = (url) => {
     if (!url) return null;
-    // Extract the filename without extension
-    const matches = url.match(/\/v\d+\/([^/]+)\.\w+$/);
-    return matches ? matches[1] : null;
+    
+    // Extract everything after the upload part excluding the extension
+    const matches = url.match(/\/upload\/v\d+\/(.+)(?:\.\w+)$/);
+    
+    if (matches && matches[1]) {
+        return matches[1]; // This will include the folder path (profiles/photo-...)
+    }
+    return null;
 };
 
 // Get all users
@@ -81,6 +86,7 @@ export const deleteUser = asyncHandler(async (req, res, next) => {
         // Delete profile photo
         if (user.photo && user.photo !== 'default.jpg') {
             const photoPublicId = getPublicIdFromUrl(user.photo);
+            console.log(photoPublicId);
             if (photoPublicId) {
                 await cloudinary.uploader.destroy(photoPublicId);
             }
@@ -89,6 +95,7 @@ export const deleteUser = asyncHandler(async (req, res, next) => {
         // Delete visa document if it exists
         if (user.visa) {
             const visaPublicId = getPublicIdFromUrl(user.visa);
+            console.log(visaPublicId);
             if (visaPublicId) {
                 await cloudinary.uploader.destroy(visaPublicId);
             }

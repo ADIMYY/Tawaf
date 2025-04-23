@@ -27,6 +27,7 @@ dotenv.config({ path: join(__dirname, 'config.env') });
 const db = process.env.DATA_BASE.replace('<db_password>', process.env.DB_PASSWORD);
 try {
     await mongoose.connect(db)
+    console.log('Connected to the database');
 } catch (error) {
     console.log(error.message);
     process.exit(1);
