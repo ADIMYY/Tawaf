@@ -2,6 +2,15 @@ import asyncHandler from "express-async-handler";
 import appError from "../Utils/appError.js";
 import User from "../Model/userModel.js";
 import sendEmail from "../Utils/sendEmail.js";
+import { v2 as cloudinary } from 'cloudinary';
+
+// Utility function to extract public_id from Cloudinary URL
+const getPublicIdFromUrl = (url) => {
+    if (!url) return null;
+    // Extract the filename without extension
+    const matches = url.match(/\/v\d+\/([^/]+)\.\w+$/);
+    return matches ? matches[1] : null;
+};
 
 // Get all users
 export const getAllUsers = asyncHandler(async (req, res, next) => {
@@ -59,13 +68,38 @@ export const updateUser = asyncHandler(async (req, res, next) => {
 
 //* Delete a user by ID
 export const deleteUser = asyncHandler(async (req, res, next) => {
-    // Find and delete the user in one operation
-    const user = await User.findByIdAndDelete(req.params.id);
+    // Find the user first to get their image URLs
+    const user = await User.findById(req.params.id);
     
     // Check if user existed
     if (!user) {
         return next(new appError('No user found with this ID', 404));
     }
+
+    // Delete images from Cloudinary if they exist
+    try {
+        // Delete profile photo
+        if (user.photo && user.photo !== 'default.jpg') {
+            const photoPublicId = getPublicIdFromUrl(user.photo);
+            if (photoPublicId) {
+                await cloudinary.uploader.destroy(photoPublicId);
+            }
+        }
+
+        // Delete visa document if it exists
+        if (user.visa) {
+            const visaPublicId = getPublicIdFromUrl(user.visa);
+            if (visaPublicId) {
+                await cloudinary.uploader.destroy(visaPublicId);
+            }
+        }
+    } catch (error) {
+        console.error('Error deleting images from Cloudinary:', error);
+        // Continue with user deletion even if image deletion fails
+    }
+
+    // Delete the user from database
+    await User.findByIdAndDelete(req.params.id);
 
     // Check if the requesting user has admin privileges
     if (req.user.role === 'admin') {
