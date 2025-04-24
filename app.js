@@ -18,6 +18,9 @@ import prayTimes from './Routes/prayTimesRoute.js';
 // Middleware
 import globalError from './Middleware/errorMiddleware.js';
 
+// Cron Jobs
+import startVisaExpirationCron from './Utils/visaExpirationCron.js';
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
@@ -68,4 +71,7 @@ app.use(globalError);
 
 app.listen(port, async () => {
     console.log(`Server is running on port ${port}`);
+    // Start the visa expiration cron job
+    startVisaExpirationCron();
+    console.log('Visa expiration cron job started');
 });

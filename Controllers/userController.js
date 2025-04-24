@@ -107,7 +107,6 @@ export const deleteUser = asyncHandler(async (req, res, next) => {
             }
         }
 
-
         // Delete Qr code
         if (user.qrcode) {
             const qrCodePublicId = getPublicIdFromUrl(user.qrcode);
@@ -131,27 +130,6 @@ export const deleteUser = asyncHandler(async (req, res, next) => {
             <p>Dear ${user.name},</p>
             <p>Your account has been deleted from our system.</p>
         `;
-    
-        if (user.visaExpiryDate) {
-            const visaExpiryDate = new Date(user.visaExpiryDate);
-            if (!isNaN(visaExpiryDate.getTime())) {  // Check if date is valid
-                const formattedDate = visaExpiryDate.toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                });
-                
-                if (visaExpiryDate <= new Date()) {
-                    emailMessage += `
-                        <p>Your visa expired on ${formattedDate}.</p>
-                    `;
-                } else {
-                    emailMessage += `
-                        <p>Your visa will expire on ${formattedDate}.</p>
-                    `;
-                }
-            }
-        }
     
         if (req.body.message) {
             emailMessage += `
