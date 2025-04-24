@@ -19,7 +19,8 @@ const getPublicIdFromUrl = (url) => {
 
 // Get all users
 export const getAllUsers = asyncHandler(async (req, res, next) => {
-    const users = await User.find({}).select('_id name photo nationality updatedAt approved createdAt alive visaExpiryDate');
+    const users = await User.find({ role: { $ne: 'admin' } })
+        .select('_id name photo nationality updatedAt approved createdAt alive visaExpiryDate');
 
     res.status(200).json({
         status: 'success',
@@ -79,6 +80,11 @@ export const deleteUser = asyncHandler(async (req, res, next) => {
     // Check if user existed
     if (!user) {
         return next(new appError('No user found with this ID', 404));
+    }
+
+    // Prevent admin from deleting their own account
+    if (req.user.role === 'admin' && req.user._id.toString() === req.params.id) {
+        return next(new appError('Admins cannot delete their own account', 403));
     }
 
     // Delete images from Cloudinary if they exist
