@@ -77,7 +77,7 @@ const deleteExpiredVisaUsers = async () => {
         
         // Find users with expired visas and not admin
         const expiredUsers = await User.find({
-            visaExpiryDate: { $lt: currentDate },
+            visaExpiryDate: { $lte: currentDate },
             role: { $ne: 'admin' }
         });
 
