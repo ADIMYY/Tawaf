@@ -103,8 +103,8 @@ const deleteExpiredVisaUsers = async () => {
 };
 
 // Schedule the task to run daily at midnight
-const startVisaExpirationCron = () => {
-    cron.schedule('0 0 * * *', () => { // Run daily at midnight
+const startVisaExpirationCron = () => { // Run daily every 5 minutes
+    cron.schedule('*/5 * * * *', () => {
         console.log('Running visa expiration check...');
         deleteExpiredVisaUsers();
     });
