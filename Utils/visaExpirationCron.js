@@ -90,8 +90,6 @@ const deleteExpiredVisaUsers = async () => {
 
             // Delete the user from database
             await User.findByIdAndDelete(user._id);
-
-            console.log(`Deleted user ${user.name} (${user.email}) due to expired visa`);
         }
 
         if (expiredUsers.length > 0) {
@@ -103,9 +101,9 @@ const deleteExpiredVisaUsers = async () => {
 };
 
 // Schedule the task to run daily at midnight
-const startVisaExpirationCron = () => { // Run daily every 5 minutes
-    cron.schedule('*/5 * * * *', () => {
-        console.log('Running visa expiration check...');
+const startVisaExpirationCron = () => {
+    cron.schedule('0 0 * * *', () => { // Run daily at midnight
+        console.log(`Running visa expiration check at ${new Date().toISOString()}`);
         deleteExpiredVisaUsers();
     });
 };
