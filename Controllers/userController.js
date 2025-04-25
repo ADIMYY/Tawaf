@@ -20,7 +20,7 @@ const getPublicIdFromUrl = (url) => {
 // Get all users
 export const getAllUsers = asyncHandler(async (req, res, next) => {
     const users = await User.find({ role: { $ne: 'admin' } })
-        .select('_id name photo nationality updatedAt approved createdAt alive');
+        .select('_id name photo nationality updatedAt approved createdAt alive visaExpiryDate');
 
     res.status(200).json({
         status: 'success',
