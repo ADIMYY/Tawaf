@@ -1,4 +1,4 @@
-const getProfileTemplate = (user) => `
+export const getProfileTemplate = (user) => `
         <!DOCTYPE html>
         <html lang="en">
         <head>

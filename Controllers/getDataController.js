@@ -1,7 +1,7 @@
 import asyncHandler from "express-async-handler";
 import User from '../Model/userModel.js';
 import appError from "../Utils/appError.js";
-import { getProfileTemplate } from '../templates/profileTemplate.js';
+import { getProfileTemplate } from "../templates/profileTemplate.js";
 
 export const getUserByPassport = asyncHandler(async (req, res, next) => {
     const user = await User.findOne({ passPortNumber: req.params.passport })
