@@ -4,7 +4,7 @@ import appError from "../Utils/appError.js";
 import { getProfileTemplate } from '../templates/profileTemplate.js';
 
 export const getUserByPassport = asyncHandler(async (req, res, next) => {
-    const user = await User.findOne({ passPortNumber: passportNumber })
+    const user = await User.findOne({ passPortNumber: req.params.passport })
         .select('photo name nationality state passPortNumber birthDate maritalStatus myDiseases medicinesName relativePhone companyNumber companyName relationship');
     
     if (!user) {
