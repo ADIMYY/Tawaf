@@ -1,16 +1,175 @@
-export const getProfileTemplate = (user) => `
+const getProfileTemplate = (user) => `
         <!DOCTYPE html>
         <html lang="en">
         <head>
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <title>Profile</title>
-            <link rel="stylesheet" href="profileStyles.css">
+            <style>
+                body {
+                    font-family: 'Inter', sans-serif;
+                    margin: 0;
+                    padding: 0;
+                    border-radius: 8px;
+                    background: linear-gradient(180deg, #FCFAF4 0%, #F8F4E1 100%);
+                }
+                
+                .content {
+                    max-width: 800px;
+                    margin: 20px auto;
+                    border-radius: 8px;
+                    background: linear-gradient(180deg, #FCFAF4 0%, #F8F4E1 100%);
+                    padding: 20px;
+                    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+                    text-align: center;
+                }
+                
+                
+                .avatar {
+                    width: 150px; 
+                    height: 150px;
+                    border-radius: 50%;
+                    border: 3px solid #5A360F;
+                }
+            
+                .divider {
+                    width: 100%;
+                    height: 1px;
+                    background-color: #0000001a;
+                    margin: 10px 0;
+                }
+                
+            
+                .section {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    margin-top: 20px;
+                
+                }
+                
+                .section img {
+                    width: 20px;
+                    height: 20px;
+                }
+                
+                .section-title {
+                    font-size: 14px;
+                    font-weight: 700;
+                    color: #222;
+                }
+                
+            
+                .info-grid {
+                    border-radius: 8px;
+                    border: 1px solid rgba(90, 54, 15, 0.10);
+                    box-shadow: 2px 0px 6px 0px rgba(0, 0, 0, 0.10);
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(200px, 2fr));
+                    gap: 10px;
+                    padding: 15px;
+                    text-align: left;
+                }
+                .contact-grid {
+                    border-radius: 8px;
+                    border: 1px solid rgba(90, 54, 15, 0.10);
+                    box-shadow: 2px 0px 6px 0px rgba(0, 0, 0, 0.10);
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(250px, 2fr));
+                    gap: 10px;
+                    padding: 15px;
+                    text-align: left;
+                }
+                .health-grid {
+                    border-radius: 8px;
+                    border: 1px solid rgba(90, 54, 15, 0.10);
+                    box-shadow: 2px 0px 6px 0px rgba(0, 0, 0, 0.10);
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+                    gap: 10px;
+                    padding: 15px;
+                    text-align: left;
+                }
+            
+                .info-item {
+                    background: transparent;
+                    padding: 10px;
+                    border-radius: 5px;
+                }
+                
+            
+                .info-label {
+                    font-size: 14px;
+                    color: rgba(90, 54, 15, 0.60);
+                    font-weight: 500;
+                    margin-bottom: 5px;
+                }
+                
+                .info-value {
+                    font-size: 14px;
+                    color: #5A360F;
+                    font-weight: 600;
+                    margin-left: 2px;
+                }
+                
+            
+                @media (max-width: 768px) {
+                    .content {
+                        width: 90%;
+                        padding: 15px;
+                    }
+                
+                    .avatar {
+                        width: 120px;
+                        height: 120px;
+                    }
+                
+                    .info-grid, .contact-grid, .health-grid {
+                        grid-template-columns: 1fr;
+                    }
+                
+                    .divider {
+                        margin: 15px 0;
+                    }
+                
+                
+                
+                    .section-title {
+                        font-size: 16px;
+                    }
+                }
+                
+                @media (max-width: 480px) {
+                    .content {
+                        width: 95%;
+                        padding: 10px;
+                    }
+                
+                    .avatar {
+                        width: 100px;
+                        height: 100px;
+                    }
+                
+                    .info-label, .info-value {
+                        font-size: 13px;
+                    }
+                
+                    .divider {
+                        margin: 10px 0;
+                    }
+                }
+                
+            </style>
         </head>
         <body>
+
             <div class="content">
                 <img src="${user.photo}" alt="Profile Picture" class="avatar">
                 <p class="name">${user.name}</p>
+
+            
+
+            
 
                 <!-- Basic Information Section -->
                 <div class="section">
@@ -20,6 +179,7 @@ export const getProfileTemplate = (user) => `
                         <path d="M9.85 13.65V9.4C9.85 8.99965 9.85 8.79905 9.7259 8.6741C9.60095 8.55 9.4012 8.55 9 8.55M9.6375 6H9.64515" 
                             stroke="#222222" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
+                    
                     <p class="section-title">Basic Information</p>
                 </div>
 
@@ -36,6 +196,8 @@ export const getProfileTemplate = (user) => `
                         <p class="info-label">• State</p>
                         <p class="info-value">${user.state}</p>
                     </div>
+                
+            
                     <div class="info-item">
                         <p class="info-label">• Passport number</p>
                         <p class="info-value">${user.passPortNumber}</p>
@@ -49,6 +211,8 @@ export const getProfileTemplate = (user) => `
                         <p class="info-value">${user.maritalStatus}</p>
                     </div>
                 </div>
+
+            
 
                 <!-- Contact Information Section -->
                 <div class="section">
@@ -68,6 +232,7 @@ export const getProfileTemplate = (user) => `
                         <p class="info-label">• Name of the tourism company</p>
                         <p class="info-value">${user.companyName}</p>
                     </div>
+                
                     <div class="info-item">
                         <p class="info-label">• Relative's Phone Number</p>
                         <p class="info-value">${user.relativePhone}</p>
@@ -77,6 +242,8 @@ export const getProfileTemplate = (user) => `
                         <p class="info-value">${user.relationship}</p>
                     </div>
                 </div>
+
+            
 
                 <!-- Health Information Section -->
                 <div class="section">
@@ -91,11 +258,15 @@ export const getProfileTemplate = (user) => `
                         <p class="info-label">• Chronic diseases</p>
                         <p class="info-value">${user.myDiseases}</p>
                     </div>
+                
                     <div class="info-item">
                         <p class="info-label">• Chronic medications</p>
                         <p class="info-value">${user.medicinesName}</p>
                     </div>
                 </div>
+
+            
             </div>
+
         </body>
-        </html>`; 
+        </html>`;
