@@ -26,21 +26,22 @@ const __dirname = dirname(__filename);
 
 dotenv.config({ path: join(__dirname, 'config.env') });
 
-
+// Connect to MongoDB
 const db = process.env.DATA_BASE.replace('<db_password>', process.env.DB_PASSWORD);
 try {
-    await mongoose.connect(db)
-    console.log('Connected to the database');
+    await mongoose.connect(db);
+    console.log('Connected to the database successfully');
 } catch (error) {
-    console.log(error.message);
+    console.error('Database connection error:', error.message);
     process.exit(1);
 }
+
+// Configure Cloudinary
 cloudinary.config({
     cloud_name: process.env.CLOUD_NAME,
     api_key: process.env.API_KEY,
     api_secret: process.env.API_SECRET,
 });
-
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -54,21 +55,25 @@ if (process.env.NODE_ENV === 'development') {
     app.use(morgan('dev'));
 }
 
+// Rate limiting configuration
 const limiter = rateLimit({
-    windowMs: 5 * 60 * 1000, // 15 minutes
-    max: 500, // Allow 300 requests every 15 minutes
-    message: 'Too many requests from this IP, please try again in 15 minutes',
+    windowMs: 5 * 60 * 1000, // 5 minutes
+    max: 500, // Allow 500 requests every 5 minutes
+    message: 'Too many requests from this IP, please try again in 5 minutes',
 });
 app.use('/api', limiter);
 
+// API Routes
 app.use('/api/v1/users', userRoute);
 app.use('/api/v1/auth', authRoute);
 app.use('/api/v1/weather', weatherRoute);
 app.use('/api/v1/get-data', getDataRoute);
 app.use('/api/v1/prayTimes', prayTimes);
 
+// Global error handling middleware
 app.use(globalError);
 
+// Start the server
 app.listen(port, async () => {
     console.log(`Server is running on port ${port}`);
     // Start the visa expiration cron job
