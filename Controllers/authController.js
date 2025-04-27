@@ -84,7 +84,7 @@ async function processAndUploadImage(file, fieldName, req) {
 async function generateQrcode(user) {
     try {
         const fileName = `${user._id}`;
-        const url = `https://tawaf-isp4-git-master-adimys-projects.vercel.app/api/v1/get-data/Qrcode?id=${user._id}`;
+        const url = `https://tawaf-sooty.vercel.app/api/v1/get-data/Qrcode?id=${user._id}`;
 
         // Generate QR code as a buffer
         const qrBuffer = await QRCode.toBuffer(url);
