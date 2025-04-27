@@ -8,7 +8,7 @@ export const getUserByPassport = asyncHandler(async (req, res, next) => {
         .select('photo name nationality state passPortNumber birthDate maritalStatus myDiseases medicinesName relativePhone companyNumber companyName relationship');
     
     if (!user) {
-        throw new appError('No user found with this passport number', 404);
+        next(new appError('No user found with this passport number', 404));
     }
     
     res.status(200).json({ status: 'success', data: user });
@@ -17,7 +17,7 @@ export const getUserByPassport = asyncHandler(async (req, res, next) => {
 export const getDataFromQrcode = asyncHandler(async (req, res, next) => {
     const user = await User.findById(req.query.id);
     if (!user) {
-        throw new appError('No user found with this ID', 404);
+        next(new appError('No user found with this QR code', 404));
     }
     res.status(200).send(getProfileTemplate(user));
 });
