@@ -110,6 +110,8 @@ npm start
 
 ## API Documentation
 
+For detailed API documentation, please visit our [Postman Documentation](https://documenter.getpostman.com/view/30662537/2sAYBYgVyB).
+
 ### Available Endpoints
 
 #### Authentication Routes (`/api/v1/auth`)
@@ -148,10 +150,22 @@ npm start
 - Get health information
 - Get visa status
 
+### API Features
+
+- RESTful API architecture
+- JWT authentication
+- Rate limiting (500 requests per 5 minutes per IP)
+- Error handling with detailed messages
+- Response formatting
+- Request validation
+- File upload support
+- CORS enabled
+
 ### Rate Limiting
 
 - API requests are limited to 500 requests per 5 minutes per IP address
 - Rate limit headers are included in responses
+- Custom rate limit messages for exceeded requests
 
 ## Contributing
 
