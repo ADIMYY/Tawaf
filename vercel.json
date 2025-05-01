@@ -15,7 +15,7 @@
     "crons": [
         {
             "path": "/api/cron/check-visa-expiration",
-            "schedule": "* * * * *"
+            "schedule": "0 0 * * *"
         }
     ]
 }
