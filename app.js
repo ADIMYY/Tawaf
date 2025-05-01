@@ -27,12 +27,10 @@ import userRoute from './Routes/userRoutes.js';
 import weatherRoute from './Routes/weatherRoute.js';
 import getDataRoute from './Routes/getDataRoute.js';
 import prayTimes from './Routes/prayTimesRoute.js';
+import cronRoute from './Routes/cronRoutes.js';
 
 //! Middleware
 import globalError from './Middleware/errorMiddleware.js';
-
-//! Scheduled tasks
-import startVisaExpirationCron from './Utils/visaExpirationCron.js';
 
 //! Initialize environment variables
 const __filename = fileURLToPath(import.meta.url);
@@ -104,6 +102,7 @@ const initializeApp = () => {
     app.use('/api/v1/weather', weatherRoute);
     app.use('/api/v1/get-data', getDataRoute);
     app.use('/api/v1/prayTimes', prayTimes);
+    app.use(cronRoute);
 
     //! Error handling middleware (should be last)
     app.use(globalError);
@@ -127,10 +126,6 @@ const startServer = async () => {
     //! Start server
     app.listen(port, async () => {
         console.log(`Server is running on port ${port}`);
-    
-        //! Start scheduled tasks
-        startVisaExpirationCron();
-        console.log('Visa expiration cron job started');
     });
 };
 

@@ -1,4 +1,3 @@
-import cron from 'node-cron';
 import User from '../Model/userModel.js';
 import { v2 as cloudinary } from 'cloudinary';
 import sendEmail from './sendEmail.js';
@@ -74,7 +73,7 @@ const sendDeletionEmail = async (user) => {
 };
 
 // Function to delete users with expired visas
-const deleteExpiredVisaUsers = async () => {
+export const deleteExpiredVisaUsers = async () => {
     try {
         const currentDate = new Date();
         
@@ -108,21 +107,6 @@ const deleteExpiredVisaUsers = async () => {
         }
     } catch (error) {
         console.error('Error in deleteExpiredVisaUsers:', error);
-        // Log the error but don't throw it to prevent the cron job from stopping
+        throw error; // Re-throw the error to be handled by the API endpoint
     }
-};
-
-// Schedule the task to run daily at midnight
-const startVisaExpirationCron = () => { // every 1 minute
-    cron.schedule('* * * * *', async () => {
-        console.log(`Running visa expiration check at ${new Date().toISOString()}`);
-        try {
-            await deleteExpiredVisaUsers();
-        } catch (error) {
-            console.error('Visa expiration cron job failed:', error);
-        }
-    });
-    console.log('Visa expiration cron job scheduled to run daily at midnight');
-};
-
-export default startVisaExpirationCron; 
+}; 
