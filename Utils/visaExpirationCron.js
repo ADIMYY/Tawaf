@@ -1,7 +1,6 @@
 import User from '../Model/userModel.js';
 import { v2 as cloudinary } from 'cloudinary';
 import sendEmail from './sendEmail.js';
-import appError from './appError.js';
 
 // Utility function to extract public_id from Cloudinary URL
 const getPublicIdFromUrl = (url) => {
@@ -76,15 +75,26 @@ const sendDeletionEmail = async (user) => {
 export const deleteExpiredVisaUsers = async () => {
     try {
         const currentDate = new Date();
+        console.log(`Running visa expiration check at ${currentDate.toISOString()}`);
         
-        // Find users with expired visas and not admin
+        // Find users with expired visas and not admin, ensure visaExpiryDate is a valid date
         const expiredUsers = await User.find({
-            visaExpiryDate: { $lt: currentDate },
+            visaExpiryDate: { 
+                $exists: true, 
+                $lt: currentDate,
+                $type: "date"  // Ensure field is actually a date
+            },
             role: { $ne: 'admin' }
         });
 
         console.log(`Found ${expiredUsers.length} users with expired visas`);
 
+        // Log visa expiry dates for debugging
+        expiredUsers.forEach(user => {
+            console.log(`User ${user._id} (${user.name}): Visa expires ${user.visaExpiryDate.toISOString()}, Email: ${user.email}`);
+        });
+
+        let deletedCount = 0;
         for (const user of expiredUsers) {
             try {
                 // Delete user's images from Cloudinary
@@ -103,10 +113,12 @@ export const deleteExpiredVisaUsers = async () => {
         }
 
         if (expiredUsers.length > 0) {
-            console.log(`Completed processing ${expiredUsers.length} users with expired visas`);
+            console.log(`Completed processing ${deletedCount} out of ${expiredUsers.length} users with expired visas`);
+        } else {
+            console.log('No users found with expired visas');
         }
     } catch (error) {
         console.error('Error in deleteExpiredVisaUsers:', error);
-        throw error; // Re-throw the error to be handled by the API endpoint
+        throw error;
     }
-}; 
+};
