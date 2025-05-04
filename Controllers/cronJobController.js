@@ -2,7 +2,7 @@ import asyncHandler from "express-async-handler";
 import { v2 as cloudinary } from 'cloudinary';
 
 import User from '../Model/userModel.js';
-import sendEmail from "../Utils/email.js";
+import sendEmail from "../Utils/sendEmail.js";
 
 // Utility function to extract public_id from Cloudinary URL
 const getPublicIdFromUrl = (url) => {
