@@ -1,6 +1,8 @@
-import User from '../Model/userModel.js';
+import asyncHandler from "express-async-handler";
 import { v2 as cloudinary } from 'cloudinary';
-import sendEmail from './sendEmail.js';
+
+import User from '../Model/userModel.js';
+import sendEmail from "../Utils/email.js";
 
 // Utility function to extract public_id from Cloudinary URL
 const getPublicIdFromUrl = (url) => {
@@ -71,54 +73,25 @@ const sendDeletionEmail = async (user) => {
     }
 };
 
-// Function to delete users with expired visas
-export const deleteExpiredVisaUsers = async () => {
-    try {
-        const currentDate = new Date();
-        console.log(`Running visa expiration check at ${currentDate.toISOString()}`);
-        
-        // Find users with expired visas and not admin, ensure visaExpiryDate is a valid date
-        const expiredUsers = await User.find({
-            visaExpiryDate: { 
-                $exists: true, 
-                $lt: currentDate,
-                $type: "date"  // Ensure field is actually a date
-            },
-            role: { $ne: 'admin' }
-        });
+export const deleteUserWithExpiredVisa = asyncHandler(async (req, res, next) => {
+    const currentDate = new Date();
+    const expiredUsers = await User.find({
+        visaExpiryDate: { $lt: currentDate, $ne: null },
+        role: { $ne: 'admin' } // Exclude admin users
+    });
 
-        console.log(`Found ${expiredUsers.length} users with expired visas`);
-
-        // Log visa expiry dates for debugging
-        expiredUsers.forEach(user => {
-            console.log(`User ${user._id} (${user.name}): Visa expires ${user.visaExpiryDate.toISOString()}, Email: ${user.email}`);
-        });
-
-        let deletedCount = 0;
-        for (const user of expiredUsers) {
-            try {
-                // Delete user's images from Cloudinary
-                await deleteUserImages(user);
-
-                // Send deletion notification email
-                await sendDeletionEmail(user);
-
-                // Delete the user from database
-                await User.findByIdAndDelete(user._id);
-                console.log(`Successfully deleted user ${user._id} with expired visa`);
-            } catch (userError) {
-                console.error(`Error processing user ${user._id}:`, userError);
-                // Continue with the next user even if one fails
-            }
-        }
-
-        if (expiredUsers.length > 0) {
-            console.log(`Completed processing ${deletedCount} out of ${expiredUsers.length} users with expired visas`);
-        } else {
-            console.log('No users found with expired visas');
-        }
-    } catch (error) {
-        console.error('Error in deleteExpiredVisaUsers:', error);
-        throw error;
+    if (expiredUsers.length === 0) {
+        return res.status(200).json({ status: 'success', message: 'No users with expired visas found.' });
     }
-};
+
+    for (const user of expiredUsers) {
+        await deleteUserImages(user);
+        await sendDeletionEmail(user);
+        await User.findByIdAndDelete(user._id);
+    }
+
+    res.status(200).json({
+        status: 'success',
+        message: 'Users with expired visas have been successfully deleted.'
+    });
+});

@@ -2,10 +2,6 @@
     "version": 2,
     "builds": [
         {
-            "src": "api/**/*.js",
-            "use": "@vercel/node"
-        },
-        {
             "src": "app.js",
             "use": "@vercel/node"
         }
@@ -14,12 +10,6 @@
         {
             "src": "/(.*)",
             "dest": "/app.js"
-        }
-    ],
-    "crons": [
-        {
-            "path": "/api/cron/check-visa-expiration",
-            "schedule": "0 0 * * *"
         }
     ]
 }

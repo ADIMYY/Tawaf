@@ -27,6 +27,7 @@ import userRoute from './Routes/userRoutes.js';
 import weatherRoute from './Routes/weatherRoute.js';
 import getDataRoute from './Routes/getDataRoute.js';
 import prayTimes from './Routes/prayTimesRoute.js';
+import cronJobRoute from './Routes/cronJobRoute.js';
 
 //! Middleware
 import globalError from './Middleware/errorMiddleware.js';
@@ -101,6 +102,7 @@ const initializeApp = () => {
     app.use('/api/v1/weather', weatherRoute);
     app.use('/api/v1/get-data', getDataRoute);
     app.use('/api/v1/prayTimes', prayTimes);
+    app.use('/api/v1/cronJob', cronJobRoute);
 
     //! Error handling middleware (should be last)
     app.use(globalError);

@@ -5,7 +5,7 @@ const sendEmail = async (options) => {
         service: 'gmail',
         auth: {
             user: 'abdoadimy0@gmail.com', // Your Gmail address
-            pass: 'iiegslrmgmilacyy'     // Your Gmail app password (not your regular password)
+            pass: 'sycj hsxk zpfv btej'     // Your Gmail app password (not your regular password)
         }
     });
 
