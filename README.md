@@ -1,6 +1,17 @@
 # TAWAAF APP
 
-A comprehensive Islamic application built with Node.js and Express.js framework, providing prayer times, weather information, and user management features.
+A comprehensive Islamic application built with Node.js and Express.js framework, providing prayer times, weather information, and user management features for Hajj and Umrah pilgrims.
+
+## Overview
+
+Tawaaf App is designed to assist pilgrims with:
+
+- Accurate prayer time information based on their location
+- Real-time weather updates in Saudi Arabia
+- Digital identity management through QR codes
+- Health information tracking
+- Visa status monitoring
+- Emergency contact management
 
 ## Features
 
@@ -10,60 +21,82 @@ A comprehensive Islamic application built with Node.js and Express.js framework,
 - Support for multiple calculation methods (Umm Al-Qura)
 - Automatic timezone detection
 - Formatted prayer times in 12-hour format
+- Real-time updates for each prayer time
 
 ### Weather Information
 
 - Real-time weather data using Tomorrow.io API
 - Current weather conditions with detailed descriptions
-- Temperature forecasts
+- Temperature forecasts with day/night breakdowns
 - Wind speed and humidity information
 - Weather icons and visual representations
-- Caching system for optimized performance
+- Smart caching system for optimized performance
+- Hourly and daily forecast options
 
 ### User Management
 
 - Secure user authentication with JWT
 - User registration with email verification
+- Digital profile with QR code generation
 - Profile management with photo upload
 - Passport number-based user lookup
-- Health information tracking
+- Comprehensive health information tracking
 - Visa management with expiration notifications
-- QR code generation for user profiles
+- Emergency contact information
+- Tourism company details management
 
 ### Security Features
 
 - Password hashing with bcrypt
-- JWT-based authentication
-- Rate limiting for API endpoints
-- Secure file upload handling
+- JWT-based authentication with expiration
+- Rate limiting (500 requests/5 minutes/IP)
+- Secure file upload handling with validation
 - Input validation and sanitization
 - Helmet.js for enhanced security headers
 - CORS protection
-- Trust proxy configuration for proper IP detection
+- Trust proxy configuration
+- Secure password reset mechanism
 
 ### Additional Features
 
-- Email notifications system
-- Cloudinary integration for image storage
-- MongoDB database integration
+- Automated email notification system
+- Cloud-based image storage with Cloudinary
+- MongoDB database with mongoose ODM
 - RESTful API architecture
-- Error handling middleware
-- Environment variable configuration
-- Morgan logging in development mode
-- Automatic visa expiration tracking
+- Comprehensive error handling
+- Development/Production environment configuration
+- Detailed logging system
+- Automated visa expiration management
+- Multi-language support (planned)
 
-## Project Structure
+## Technical Architecture
+
+### Project Structure
 
 ```
 ├── Controllers/     # Business logic and request handling
+│   ├── authController.js
+│   ├── userController.js
+│   ├── weatherController.js
+│   └── prayTimeController.js
 ├── Model/          # Database models and schemas
 ├── Routes/         # API route definitions
 ├── Middleware/     # Custom middleware functions
 ├── Utils/          # Utility functions and helpers
 ├── Templates/      # Email and profile templates
 ├── app.js          # Main application entry point
-└── package.json    # Project dependencies and scripts
+└── package.json    # Project dependencies
 ```
+
+### Technology Stack
+
+- **Backend**: Node.js, Express.js
+- **Database**: MongoDB with Mongoose ODM
+- **Authentication**: JWT, bcrypt
+- **File Storage**: Cloudinary
+- **APIs**: Tomorrow.io (Weather), Adhan.js (Prayer Times)
+- **Security**: Helmet.js, CORS, Rate Limiting
+- **Documentation**: Postman
 
 ## Prerequisites
 
@@ -72,6 +105,7 @@ A comprehensive Islamic application built with Node.js and Express.js framework,
 - MongoDB database
 - Cloudinary account (for image storage)
 - Tomorrow.io API key (for weather data)
+- Gmail account (for email notifications)
 
 ## Installation
 
@@ -79,6 +113,7 @@ A comprehensive Islamic application built with Node.js and Express.js framework,
 
 ```bash
 git clone https://github.com/ADIMYY/Tawaf.git
+cd Tawaf
 ```
 
 2. Install dependencies
@@ -88,93 +123,118 @@ npm install
 ```
 
 3. Configure environment variables
-   Create a `config.env` file in the root directory with the following variables:
+   Create a \`config.env\` file in the root directory:
 
-```
+```env
 PORT=3000
 NODE_ENV=development
 DATA_BASE=your_mongodb_connection_string
 DB_PASSWORD=your_mongodb_password
 JWT_SECRET_KEY=your_jwt_secret
+JWT_EXPIRE_TIME=90d
 CLOUD_NAME=your_cloudinary_cloud_name
 API_KEY=your_cloudinary_api_key
 API_SECRET=your_cloudinary_api_secret
 WEATHER_API_KEY=your_tomorrow_io_api_key
 ```
 
-4. Start the development server
+4. Start the server
 
 ```bash
+# Development mode
+npm run start:dev
+
+# Production mode
 npm start
 ```
 
 ## API Documentation
 
-For detailed API documentation, please visit our [Postman Documentation](https://documenter.getpostman.com/view/30662537/2sAYBYgVyB).
+Comprehensive API documentation is available on [Postman](https://documenter.getpostman.com/view/30662537/2sAYBYgVyB).
 
-### Available Endpoints
+### Core Endpoints
 
-#### Authentication Routes (`/api/v1/auth`)
+#### Authentication (`/api/v1/auth`)
 
-- User registration
-- User login
-- Password reset
-- Email verification
+- POST `/signup` - Register new user
+- POST `/login` - Authenticate user
+- POST `/forgotPassword` - Initiate password reset
+- POST `/verifyResetCode` - Verify reset code
+- PUT `/resetpassword` - Set new password
 
-#### User Routes (`/api/v1/users`)
+#### Users (`/api/v1/users`)
 
-- Get all users
-- Get user profile
-- Update user information
-- Delete user account
-- Upload profile photo
-- Manage visa information
+- GET `/` - List all users (admin)
+- GET `/myProfile` - Get current user profile
+- PUT `/updateMyProfile` - Update user information
+- DELETE `/:id` - Delete user account
 
-#### Weather Routes (`/api/v1/weather`)
+#### Weather (`/api/v1/weather`)
 
-- Get current weather
-- Get weather forecast
-- Get hourly weather updates
-- Get temperature forecasts
+- GET `/:lat/:lon` - Get weather information
+  - Current conditions
+  - Daily forecast
+  - Temperature breakdowns
 
-#### Prayer Times Routes (`/api/v1/prayTimes`)
+#### Prayer Times (`/api/v1/prayTimes`)
 
-- Get prayer times by coordinates
-- Get prayer times by location
-- Get prayer time calculations
+- GET `/:lat/:lon` - Get prayer times
+  - Five daily prayers
+  - Qibla direction
+  - Timezone adjusted
 
-#### Data Routes (`/api/v1/get-data`)
+#### Data Access (`/api/v1/get-data`)
 
-- Get user by passport number
-- Get user profile information
-- Get health information
-- Get visa status
+- GET `/Qrcode` - Access QR code data
+- GET `/:passport` - Lookup by passport
 
-### API Features
+### Error Handling
 
-- RESTful API architecture
-- JWT authentication
-- Rate limiting (500 requests per 5 minutes per IP)
-- Error handling with detailed messages
-- Response formatting
-- Request validation
-- File upload support
-- CORS enabled
+The API implements comprehensive error handling:
+
+- Validation errors
+- Authentication errors
+- Resource not found
+- Server errors
+- Custom error messages
 
 ### Rate Limiting
 
-- API requests are limited to 500 requests per 5 minutes per IP address
-- Rate limit headers are included in responses
-- Custom rate limit messages for exceeded requests
+- **Limit**: 500 requests per 5 minutes
+- **Per**: IP address
+- **Headers**: X-RateLimit-Limit, X-RateLimit-Remaining
 
-## Contributing
+## Development
+
+### Running Tests
+
+```bash
+npm test
+```
+
+### Code Style
+
+The project follows the Airbnb JavaScript Style Guide.
+
+### Contributing
 
 1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+2. Create feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit changes (`git commit -m 'Add AmazingFeature'`)
+4. Push to branch (`git push origin feature/AmazingFeature`)
+5. Open Pull Request
+
+## Support
+
+For support, email support@tawaafapp.com or open an issue on GitHub.
 
 ## License
 
-This project is licensed under the ISC License.
+This project is licensed under the ISC License. See [LICENSE](LICENSE) for details.
+
+## Acknowledgments
+
+- Tomorrow.io for weather data
+- Adhan.js for prayer calculations
+- Cloudinary for image hosting
+- MongoDB Atlas for database hosting
