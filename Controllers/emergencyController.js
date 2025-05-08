@@ -12,7 +12,8 @@ export const createEmergency = asyncHandler(async (req, res, next) => {
 });
 
 export const getAllEmergencies = asyncHandler(async (req, res, next) => {
-    const emergencies = await Emergency.findOne({ city: req.query.city });
+    const query = req.query.city ? { city: req.query.city } : {};
+    const emergencies = await Emergency.find(query);
 
     if (!emergencies) {
         return next(new appError('No emergencies found for this city', 404));
