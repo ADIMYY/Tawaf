@@ -1,6 +1,6 @@
 import asyncHandler from "express-async-handler";
 import Emergency from "../Model/emergencyModel.js";
-import appError from "../utils/appError.js";
+import appError from "../Utils/appError.js";
 
 
 export const createEmergency = asyncHandler(async (req, res, next) => {
