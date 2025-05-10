@@ -66,7 +66,10 @@ Tawaaf App is designed to assist pilgrims with:
 - Comprehensive error handling
 - Development/Production environment configuration
 - Detailed logging system
-- Automated visa expiration management
+- Automated visa expiration management with cron jobs
+- Emergency services information for multiple cities
+- QR code profile sharing system
+- Location-based emergency contact information
 - Multi-language support (planned)
 
 ## Technical Architecture
@@ -76,15 +79,37 @@ Tawaaf App is designed to assist pilgrims with:
 ```
 ├── Controllers/     # Business logic and request handling
 │   ├── authController.js
+│   ├── cronJobController.js
+│   ├── emergencyController.js
+│   ├── getDataController.js
+│   ├── prayTimeController.js
 │   ├── userController.js
-│   ├── weatherController.js
-│   └── prayTimeController.js
+│   └── weatherController.js
 ├── Model/          # Database models and schemas
+│   ├── emergencyModel.js
+│   └── userModel.js
 ├── Routes/         # API route definitions
+│   ├── authRoute.js
+│   ├── cronJobRoute.js
+│   ├── emergencyRoute.js
+│   ├── getDataRoute.js
+│   ├── prayTimesRoute.js
+│   ├── userRoutes.js
+│   └── weatherRoute.js
 ├── Middleware/     # Custom middleware functions
+│   ├── errorMiddleware.js
+│   ├── uploadImageMiddleware.js
+│   └── validatorMiddleware.js
 ├── Utils/          # Utility functions and helpers
+│   ├── appError.js
+│   ├── generateToken.js
+│   ├── sendEmail.js
+│   └── validator/
+│       └── authValidatir.js
 ├── Templates/      # Email and profile templates
+│   └── profileTemplate.js
 ├── app.js          # Main application entry point
+├── vercel.json     # Vercel deployment configuration
 └── package.json    # Project dependencies
 ```
 
@@ -187,6 +212,21 @@ Comprehensive API documentation is available on [Postman](https://documenter.get
 
 - GET `/Qrcode` - Access QR code data
 - GET `/:passport` - Lookup by passport
+
+#### Emergency Services (`/api/v1/emergency`)
+
+- GET `/` - Get all emergency services information
+  - Filter by city using query parameter
+  - Includes hospitals, police stations, and ambulance services
+  - Contact information and locations
+  - Unified emergency numbers
+
+#### Cron Jobs (`/api/v1/cronJob`)
+
+- GET `/deleteExpiredVisaUsers` - Automated visa expiration handling
+  - Deletes user accounts with expired visas
+  - Sends email notifications
+  - Cleans up associated cloud resources
 
 ### Error Handling
 
