@@ -53,6 +53,8 @@ const citySchema = new mongoose.Schema({
 const dataSchema = new mongoose.Schema({
     city: String,
     emergency: citySchema
+}, {
+    timestamps: true
 });
 
 
