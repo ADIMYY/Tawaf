@@ -12,6 +12,7 @@ Tawaaf App is designed to assist pilgrims with:
 - Health information tracking
 - Visa status monitoring
 - Emergency contact management
+- Local amenities and services information
 
 ## Features
 
@@ -72,12 +73,23 @@ Tawaaf App is designed to assist pilgrims with:
 - Location-based emergency contact information
 - Multi-language support (planned)
 
+### Around You
+
+- Location-based services and amenities discovery
+- Detailed information about local restaurants with cuisine types
+- Nearby cafes and supermarkets with operating hours
+- Hotel listings with categories and contact information
+- Address and contact details for all venues
+- City-based filtering for precise local information
+- Location URLs for easy navigation
+
 ## Technical Architecture
 
 ### Project Structure
 
 ```
 ├── Controllers/     # Business logic and request handling
+│   ├── aroundYouController.js
 │   ├── authController.js
 │   ├── cronJobController.js
 │   ├── emergencyController.js
@@ -86,9 +98,11 @@ Tawaaf App is designed to assist pilgrims with:
 │   ├── userController.js
 │   └── weatherController.js
 ├── Model/          # Database models and schemas
+│   ├── aroundYouModel.js
 │   ├── emergencyModel.js
 │   └── userModel.js
 ├── Routes/         # API route definitions
+│   ├── aroundYouRoute.js
 │   ├── authRoute.js
 │   ├── cronJobRoute.js
 │   ├── emergencyRoute.js
