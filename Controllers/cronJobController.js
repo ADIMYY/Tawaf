@@ -4,7 +4,7 @@ import { v2 as cloudinary } from 'cloudinary';
 import User from '../Model/userModel.js';
 import sendEmail from "../Utils/sendEmail.js";
 
-// Utility function to extract public_id from Cloudinary URL
+// ! Utility function to extract public_id from Cloudinary URL
 const getPublicIdFromUrl = (url) => {
     if (!url) return null;
     const matches = url.match(/\/upload\/v\d+\/(.+)(?:\.\w+)$/);
@@ -14,7 +14,7 @@ const getPublicIdFromUrl = (url) => {
     return null;
 };
 
-// Function to delete user's images from Cloudinary
+// ! Function to delete user's images from Cloudinary
 const deleteUserImages = async (user) => {
     try {
         // Delete profile photo
@@ -46,7 +46,7 @@ const deleteUserImages = async (user) => {
     }
 };
 
-// Function to send deletion notification email
+// ! Function to send deletion notification email
 const sendDeletionEmail = async (user) => {
     try {
         const emailMessage = `
