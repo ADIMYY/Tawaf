@@ -76,7 +76,7 @@ const sendDeletionEmail = async (user) => {
 export const deleteUserWithExpiredVisa = asyncHandler(async (req, res, next) => {
     const currentDate = new Date();
     const expiredUsers = await User.find({
-        visaExpiryDate: { $lt: currentDate, $ne: null },
+        visaExpiryDate: { $lte: currentDate, $ne: null },
         role: { $ne: 'admin' } // Exclude admin users
     });
 
