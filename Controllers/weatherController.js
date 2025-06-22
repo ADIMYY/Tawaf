@@ -1,4 +1,5 @@
 import asyncHandler from "express-async-handler";
+import tzlookup from "tz-lookup";
 import axios from "axios";
 import dotenv from 'dotenv';
 
@@ -363,8 +364,11 @@ export const getWeather = asyncHandler(async (req, res, next) => {
             evening: currentDayTemps.evening?.avg || hourlyForecasts.evening || dailyTemperatures[0]?.temperature?.avg || null,
             night: currentDayTemps.night?.avg || hourlyForecasts.night || dailyTemperatures[0]?.temperature?.avg || null
         };
+
+        const timeZone = tzlookup(latitude, longitude);
+        
         const responseData = {
-            location: { lat: latitude, lon: longitude },
+            location: timeZone,
             current,
             dailyTemperatures,
             currentDayTemperatures

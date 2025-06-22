@@ -1,0 +1,78 @@
+    {
+    "weather": {
+        "temperature": "درجة الحرارة",
+        "windSpeed": "سرعة الرياح",
+        "humidity": "الرطوبة",
+        "rainChance": "فرصة هطول الأمطار",
+        "sunrise": "شروق الشمس",
+        "sunset": "غروب الشمس",
+        "description": "الوصف",
+        "dayName": {
+            "Saturday": "السبت",
+            "Sunday": "الأحد",
+            "Monday": "الاثنين",
+            "Tuesday": "الثلاثاء",
+            "Wednesday": "الأربعاء",
+            "Thursday": "الخميس",
+            "Friday": "الجمعة"
+        },
+        "weatherDescription": {
+            "Clear, sunny": "صافي ومشمس",
+            "Cloudy with hot temperatures and dry conditions": "غائم مع درجات حرارة مرتفعة وجو جاف"
+        },
+        "timeOfDay": {
+            "morning": "الصباح",
+            "afternoon": "الظهيرة",
+            "evening": "المساء",
+            "night": "الليل"
+        }
+    },
+    "prayTimes": {
+        "prayerTimes": "مواقيت الصلاة",
+        "fajr": "الفجر",
+        "dhuhr": "الظهر",
+        "asr": "العصر",
+        "maghrib": "المغرب",
+        "isha": "العشاء"
+    },
+    "user": {
+        "name": "الاسم",
+        "passPortNumber": "رقم الجواز",
+        "state": "الولاية",
+        "nationality": "الجنسية",
+        "birthDate": "تاريخ الميلاد",
+        "maritalStatus": {
+            "bachelor": "أعزب",
+            "single": "أعزب",
+            "married": "متزوج",
+            "divorced": "مطلق",
+            "widowed": "أرمل"
+        },
+        "relationship": {
+            "father": "الأب",
+            "mother": "الأم",
+            "brother": "الأخ",
+            "sister": "الأخت"
+        },
+        "myDiseases": "الأمراض",
+            "medicinesName": "الأدوية",
+            "companyName": "اسم الشركة",
+            "companyNumber": "رقم الشركة",
+            "alive": "على قيد الحياة"
+    },
+    "emergency": {
+        "hospitals": "المستشفيات",
+        "police": "الشرطة",
+        "ambulance": "الإسعاف",
+        "unified_numbers": {
+        "security_patrols": "دوريات الأمن",
+        "civil_defense": "الدفاع المدني",
+        "road_security": "أمن الطرق",
+        "traffic": "المرور",
+        "passport": "الجوازات",
+        "drug_control": "مكافحة المخدرات",
+        "water_emergency": "طوارئ المياه",
+        "electricity_emergency": "طوارئ الكهرباء"
+        }
+    }
+}

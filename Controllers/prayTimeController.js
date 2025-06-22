@@ -13,6 +13,9 @@ const formatTime = (time, timeZone) => {
 //! Controller to get prayer times for any place based on latitude and longitude
 export const getPrayTimes = asyncHandler(async (req, res, next) => {
     try {
+        // const lang = req.query.lng;
+        // req.i18n.changeLanguage(lang); // Change language based on query parameter
+        const t = req.t; // i18next translation function
         // Extract latitude and longitude from request parameters
         const latitude = parseFloat(req.params.lat);
         const longitude = parseFloat(req.params.lon);
@@ -37,11 +40,11 @@ export const getPrayTimes = asyncHandler(async (req, res, next) => {
 
         // Format prayer times for response with the correct timezone
         const formattedPrayerTimes = {
-            fajr: formatTime(prayerTimes.fajr, timeZone),
-            dhuhr: formatTime(prayerTimes.dhuhr, timeZone),
-            asr: formatTime(prayerTimes.asr, timeZone),
-            maghrib: formatTime(prayerTimes.maghrib, timeZone),
-            isha: formatTime(prayerTimes.isha, timeZone),
+            [t('prayTimes.fajr')]: formatTime(prayerTimes.fajr, timeZone),
+            [t('prayTimes.dhuhr')]: formatTime(prayerTimes.dhuhr, timeZone),
+            [t('prayTimes.asr')]: formatTime(prayerTimes.asr, timeZone),
+            [t('prayTimes.maghrib')]: formatTime(prayerTimes.maghrib, timeZone),
+            [t('prayTimes.isha')]: formatTime(prayerTimes.isha, timeZone),
         };
 
         // Send response

@@ -1,0 +1,78 @@
+{
+    "weather": {
+        "temperature": "Temperature",
+        "windSpeed": "Wind Speed",
+        "humidity": "Humidity",
+        "rainChance": "Rain Chance",
+        "sunrise": "Sunrise",
+        "sunset": "Sunset",
+        "description": "Description",
+        "dayName": {
+        "Saturday": "Saturday",
+        "Sunday": "Sunday",
+        "Monday": "Monday",
+        "Tuesday": "Tuesday",
+        "Wednesday": "Wednesday",
+        "Thursday": "Thursday",
+        "Friday": "Friday"
+        },
+        "weatherDescription": {
+            "Clear, sunny": "Clear, sunny",
+            "Cloudy with hot temperatures and dry conditions": "Cloudy with hot temperatures and dry conditions"
+        },
+        "timeOfDay": {
+            "morning": "Morning",
+            "afternoon": "Afternoon",
+            "evening": "Evening",
+            "night": "Night"
+        }
+    },
+    "prayTimes": {
+        "prayerTimes": "Prayer Times",
+        "fajr": "fajr",
+        "dhuhr": "dhuhr",
+        "asr": "asr",
+        "maghrib": "maghrib",
+        "isha": "isha"
+    },
+    "user": {
+        "name": "name",
+        "passPortNumber": "passport number",
+        "state": "state",
+        "nationality": "nationality",
+        "birthDate": "birth date",
+        "maritalStatus": {
+        "bachelor": "bachelor",
+        "single": "single",
+        "married": "married",
+        "divorced": "divorced",
+        "widowed": "widowed"
+        },
+        "relationship": {
+        "father": "father",
+        "mother": "mother",
+        "brother": "brother",
+        "sister": "sister"
+        },
+        "myDiseases": "Diseases",
+        "medicinesName": "Medicines",
+        "companyName": "Company Name",
+        "companyNumber": "Company Number",
+        "alive": "Alive"
+    },
+    "emergency": {
+        "hospitals": "Hospitals",
+        "police": "Police",
+        "ambulance": "Ambulance",
+        "unified_numbers": {
+        "security_patrols": "Security Patrols",
+        "civil_defense": "Civil Defense",
+        "road_security": "Road Security",
+        "traffic": "Traffic",
+        "passport": "Passport",
+        "drug_control": "Drug Control",
+        "water_emergency": "Water Emergency",
+        "electricity_emergency": "Electricity Emergency"
+        }
+    }
+}

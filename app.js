@@ -17,6 +17,10 @@ import cors from 'cors';
 import { rateLimit } from 'express-rate-limit';
 import morgan from 'morgan';
 
+//! i18next for internationalization
+import i18next from "./i18n.js";
+import i18nextMiddleware from 'i18next-http-middleware';
+
 //! Database and cloud services
 import mongoose from 'mongoose';
 import { v2 as cloudinary } from 'cloudinary';
@@ -84,6 +88,8 @@ const initializeApp = () => {
     app.use(cors());
     app.use(express.json({ limit: '10kb' }));
     app.use(express.urlencoded({ extended: true, limit: '10kb' }));
+
+    app.use(i18nextMiddleware.handle(i18next));
 
     //! Logging
     if (process.env.NODE_ENV === 'development') {
