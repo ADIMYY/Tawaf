@@ -40,11 +40,11 @@ export const getPrayTimes = asyncHandler(async (req, res, next) => {
 
         // Format prayer times for response with the correct timezone
         const formattedPrayerTimes = {
-            [t('prayTimes.fajr')]: formatTime(prayerTimes.fajr, timeZone),
-            [t('prayTimes.dhuhr')]: formatTime(prayerTimes.dhuhr, timeZone),
-            [t('prayTimes.asr')]: formatTime(prayerTimes.asr, timeZone),
-            [t('prayTimes.maghrib')]: formatTime(prayerTimes.maghrib, timeZone),
-            [t('prayTimes.isha')]: formatTime(prayerTimes.isha, timeZone),
+            fajr: formatTime(prayerTimes.fajr, timeZone),
+            dhuhr: formatTime(prayerTimes.dhuhr, timeZone),
+            asr: formatTime(prayerTimes.asr, timeZone),
+            maghrib: formatTime(prayerTimes.maghrib, timeZone),
+            isha: formatTime(prayerTimes.isha, timeZone),
         };
 
         // Send response
