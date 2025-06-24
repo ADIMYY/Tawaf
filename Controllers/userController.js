@@ -63,7 +63,7 @@ export const updateUser = asyncHandler(async (req, res, next) => {
     }
 
     //* Get the user and update
-    const oldUser = await User.findById(id, updateData, { new: true });
+    const oldUser = await User.findById(id);
 
     if (!oldUser) {
         return next(new appError('No user found with this ID', 404));
