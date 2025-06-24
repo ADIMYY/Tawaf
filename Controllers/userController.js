@@ -75,9 +75,11 @@ export const updateUser = asyncHandler(async (req, res, next) => {
 //* Delete a user by ID
 export const deleteUser = asyncHandler(async (req, res, next) => {
     // Find the user first to get their image URLs
-    const id = req.params.id || req.user._id; //* Use logged-in user ID if no ID is provided
-    const user = await User.findById(id);
-    
+    if (!req.params.id) {
+        req.params.id = req.user._id; //* Use logged-in user ID if no ID is provided
+    }
+    const user = await User.findById(req.params.id);
+
     // Check if user existed
     if (!user) {
         return next(new appError('No user found with this ID', 404));
@@ -122,7 +124,7 @@ export const deleteUser = asyncHandler(async (req, res, next) => {
     }
 
     // Delete the user from database
-    await User.findByIdAndDelete(id);
+    await User.findByIdAndDelete(req.params.id);
 
     // Check if the requesting user has admin privileges
     if (req.user.role === 'admin') {
