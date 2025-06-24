@@ -15,7 +15,7 @@ router.use(protect);
 router.route('/myProfile').get(getUser);
 router.route('/updateMyProfile').put(updateUser);
 router.route('/').get(restrictTo('admin'), getAllUsers);
-router.route('/').delete(deleteUser);
+router.route('/deleteMyAccount').delete(deleteUser);
 
 router
     .route('/:id')
