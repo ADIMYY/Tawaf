@@ -63,10 +63,31 @@ export const updateUser = asyncHandler(async (req, res, next) => {
     }
 
     //* Get the user and update
-    const user = await User.findByIdAndUpdate(id, updateData, { new: true });
+    const oldUser = await User.findById(id, updateData, { new: true });
 
-    if (!user) {
+    if (!oldUser) {
         return next(new appError('No user found with this ID', 404));
+    }
+
+    const user = await User.findByIdAndUpdate(id, updateData, {
+        new: true, // Return the updated user
+    });
+
+    if (!oldUser.approved && user.approved) {
+        try {
+            await sendEmail({
+                email: user.email,
+                subject: 'Account Approved',
+                text: 'Your account has been approved.',
+                message: `
+                    <p>Dear ${user.name},</p>
+                    <p>Your account has been approved. You can now access all features.</p>
+                    <p>Best regards,<br>The Tawaf Team</p>
+                `
+            })
+        } catch (error) {
+            console.error('Error sending approval email:', error);
+        }
     }
 
     res.status(200).json({ status: 'success', data: user, });
