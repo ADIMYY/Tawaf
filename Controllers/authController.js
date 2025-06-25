@@ -33,6 +33,7 @@ export const resizeImage = asyncHandler(async (req, res, next) => {
                 await processAndUploadImage(files[0], fileName, req);
             }
         }
+        console.log('✅ Uploaded photo URL:', req.body.photo);
         next();
     } catch (error) {
         console.error('Error in resizing image:', error.message);
@@ -114,6 +115,7 @@ async function generateQrcode(user) {
 
 export const signup = asyncHandler(async (req, res, next) => {
     try {
+        console.log('🧾 Full user body in signup:', req.body);
         const user = await User.create(req.body);
         const token = generateToken(user._id);
         const qrcodeUrl = await generateQrcode(user);
