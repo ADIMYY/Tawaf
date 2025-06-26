@@ -65,7 +65,6 @@ const userSchema = new mongoose.Schema(
         },
         maritalStatus: {
             type: String,
-            enum: ['single', 'married', 'divorced', 'widowed', 'bachelor'],
             required: true,
         },
         relativePhone: {

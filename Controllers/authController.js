@@ -128,7 +128,7 @@ export const signup = asyncHandler(async (req, res, next) => {
         });
     } catch (error) {
         console.error('Error in signup process:', error.message);
-        return next(new appError('Error in signup process', 500));
+        return next(new appError(`Error in signup process: ${error.message}`, 500));
     }
 });
 
