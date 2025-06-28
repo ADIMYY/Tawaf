@@ -1,294 +1,177 @@
 # TAWAAF APP
 
-A comprehensive Islamic application built with Node.js and Express.js framework, providing prayer times, weather information, and user management features for Hajj and Umrah pilgrims.
+A modern, comprehensive Islamic application built with Node.js and Express.js, designed to support Hajj and Umrah pilgrims with essential digital services.
 
 ## Overview
 
-Tawaaf App is designed to assist pilgrims with:
+Tawaaf App provides:
 
-- Accurate prayer time information based on their location
-- Real-time weather updates in Saudi Arabia
-- Digital identity management through QR codes
-- Health information tracking
-- Visa status monitoring
-- Emergency contact management
-- Local amenities and services information
+- Accurate prayer times based on user location
+- Real-time weather updates for Saudi Arabia
+- Digital identity and QR code profiles
+- Health and visa status tracking
+- Emergency contact and local amenities info
+- Multi-language support (Arabic & English)
 
 ## Features
 
 ### Prayer Times
 
-- Accurate prayer time calculations based on location coordinates
-- Support for multiple calculation methods (Umm Al-Qura)
+- Location-based, precise prayer calculations (Umm Al-Qura method)
 - Automatic timezone detection
-- Formatted prayer times in 12-hour format
-- Real-time updates for each prayer time
+- 12-hour formatted times
+- Qibla direction
 
 ### Weather Information
 
-- Real-time weather data using Tomorrow.io API
-- Current weather conditions with detailed descriptions
-- Temperature forecasts with day/night breakdowns
-- Wind speed and humidity information
-- Weather icons and visual representations
-- Smart caching system for optimized performance
-- Hourly and daily forecast options
+- Real-time weather via Tomorrow.io API
+- Current conditions, daily/hourly forecasts
+- Temperature, wind, humidity, and icons
+- Smart caching for performance
 
 ### User Management
 
-- Secure user authentication with JWT
-- User registration with email verification
-- Digital profile with QR code generation
-- Profile management with photo upload
-- Passport number-based user lookup
-- Comprehensive health information tracking
-- Visa management with expiration notifications
-- Emergency contact information
-- Tourism company details management
+- JWT authentication & secure registration
+- Email verification and password reset
+- QR code digital profiles
+- Photo upload & profile management
+- Health and visa info tracking
+- Emergency contacts & tourism company details
 
-### Security Features
+### Security
 
-- Password hashing with bcrypt
-- JWT-based authentication with expiration
-- Rate limiting (500 requests/5 minutes/IP)
-- Secure file upload handling with validation
-- Input validation and sanitization
-- Helmet.js for enhanced security headers
-- CORS protection
-- Trust proxy configuration
-- Secure password reset mechanism
+- Password hashing (bcrypt)
+- JWT with expiration
+- Rate limiting (500 req/5min/IP)
+- Secure file upload & input validation
+- Helmet.js, CORS, trust proxy
 
-### Additional Features
+### Additional
 
-- Automated email notification system
-- Cloud-based image storage with Cloudinary
-- MongoDB database with mongoose ODM
-- RESTful API architecture
-- Comprehensive error handling
-- Development/Production environment configuration
-- Detailed logging system
-- Automated visa expiration management with cron jobs
-- Emergency services information for multiple cities
-- QR code profile sharing system
-- Location-based emergency contact information
-- Multi-language support (planned)
+- Automated email notifications
+- Cloudinary image storage
+- MongoDB (Mongoose ODM)
+- RESTful API
+- Error handling & logging
+- Cron jobs for visa expiration
+- Emergency services by city
+- Location-based amenities (restaurants, hotels, etc.)
 
-### Around You
-
-- Location-based services and amenities discovery
-- Detailed information about local restaurants with cuisine types
-- Nearby cafes and supermarkets with operating hours
-- Hotel listings with categories and contact information
-- Address and contact details for all venues
-- City-based filtering for precise local information
-- Location URLs for easy navigation
-
-## Technical Architecture
-
-### Project Structure
+## Project Structure
 
 ```
-├── Controllers/     # Business logic and request handling
-│   ├── aroundYouController.js
-│   ├── authController.js
-│   ├── cronJobController.js
-│   ├── emergencyController.js
-│   ├── getDataController.js
-│   ├── prayTimeController.js
-│   ├── userController.js
-│   └── weatherController.js
-├── Model/          # Database models and schemas
-│   ├── aroundYouModel.js
-│   ├── emergencyModel.js
-│   └── userModel.js
-├── Routes/         # API route definitions
-│   ├── aroundYouRoute.js
-│   ├── authRoute.js
-│   ├── cronJobRoute.js
-│   ├── emergencyRoute.js
-│   ├── getDataRoute.js
-│   ├── prayTimesRoute.js
-│   ├── userRoutes.js
-│   └── weatherRoute.js
-├── Middleware/     # Custom middleware functions
-│   ├── errorMiddleware.js
-│   ├── uploadImageMiddleware.js
-│   └── validatorMiddleware.js
-├── Utils/          # Utility functions and helpers
-│   ├── appError.js
-│   ├── generateToken.js
-│   ├── sendEmail.js
-│   └── validator/
-│       └── authValidatir.js
-├── Templates/      # Email and profile templates
-│   └── profileTemplate.js
-├── app.js          # Main application entry point
-├── vercel.json     # Vercel deployment configuration
-└── package.json    # Project dependencies
+├── Controllers/     # Business logic
+├── Model/           # Mongoose schemas
+├── Routes/          # API endpoints
+├── Middleware/      # Custom middleware
+├── Utils/           # Helpers & validators
+├── Templates/       # Email/profile templates
+├── app.js           # App entry point
+├── vercel.json      # Deployment config
+└── package.json     # Dependencies
 ```
 
-### Technology Stack
+## Tech Stack
 
-- **Backend**: Node.js, Express.js
-- **Database**: MongoDB with Mongoose ODM
-- **Authentication**: JWT, bcrypt
-- **File Storage**: Cloudinary
-- **APIs**: Tomorrow.io (Weather), Adhan.js (Prayer Times)
-- **Security**: Helmet.js, CORS, Rate Limiting
-- **Documentation**: Postman
+- **Backend:** Node.js, Express.js
+- **Database:** MongoDB (Mongoose)
+- **Auth:** JWT, bcrypt
+- **File Storage:** Cloudinary
+- **APIs:** Tomorrow.io, Adhan.js
+- **Security:** Helmet.js, CORS, Rate Limiting
+- **Docs:** Postman
 
-## Prerequisites
+## Getting Started
 
-- Node.js (v14 or higher)
-- npm (Node Package Manager)
-- MongoDB database
-- Cloudinary account (for image storage)
-- Tomorrow.io API key (for weather data)
-- Gmail account (for email notifications)
+### Prerequisites
 
-## Installation
+- Node.js v14+
+- npm
+- MongoDB
+- Cloudinary account
+- Tomorrow.io API key
+- Gmail (for email notifications)
 
-1. Clone the repository
+### Installation
 
-```bash
-git clone https://github.com/ADIMYY/Tawaf.git
-cd Tawaf
-```
+1. Clone the repo:
 
-2. Install dependencies
+   ```bash
+   git clone https://github.com/ADIMYY/Tawaf.git
+   cd Tawaf
+   ```
 
-```bash
-npm install
-```
+2. Install dependencies:
 
-3. Configure environment variables
-   Create a \`config.env\` file in the root directory:
+   ```bash
+   npm install
+   ```
 
-```env
-PORT=3000
-NODE_ENV=development
-DATA_BASE=your_mongodb_connection_string
-DB_PASSWORD=your_mongodb_password
-JWT_SECRET_KEY=your_jwt_secret
-JWT_EXPIRE_TIME=90d
-CLOUD_NAME=your_cloudinary_cloud_name
-API_KEY=your_cloudinary_api_key
-API_SECRET=your_cloudinary_api_secret
-WEATHER_API_KEY=your_tomorrow_io_api_key
-```
+3. Configure environment variables in `config.env`:
 
-4. Start the server
+   ```env
+   PORT=3000
+   NODE_ENV=development
+   DATA_BASE=your_mongodb_connection_string
+   DB_PASSWORD=your_mongodb_password
+   JWT_SECRET_KEY=your_jwt_secret
+   JWT_EXPIRE_TIME=90d
+   CLOUD_NAME=your_cloudinary_cloud_name
+   API_KEY=your_cloudinary_api_key
+   API_SECRET=your_cloudinary_api_secret
+   WEATHER_API_KEY=your_tomorrow_io_api_key
+   ```
 
-```bash
-# Development mode
-npm run start:dev
+4. Start the server:
 
-# Production mode
-npm start
-```
+   ```bash
+   # Development
+   npm run start:dev
+
+   # Production
+   npm start
+   ```
 
 ## API Documentation
 
-Comprehensive API documentation is available on [Postman](https://documenter.getpostman.com/view/30662537/2sAYBYgVyB).
+Full API docs: [Postman Collection](https://documenter.getpostman.com/view/30662537/2sAYBYgVyB)
 
-### Core Endpoints
+### Main Endpoints
 
-#### Authentication (`/api/v1/auth`)
+- **Auth:** `/api/v1/auth` (signup, login, password reset)
+- **Users:** `/api/v1/users` (profile, update, delete)
+- **Weather:** `/api/v1/weather/:lat/:lon`
+- **Prayer Times:** `/api/v1/prayTimes/:lat/:lon`
+- **Data Access:** `/api/v1/get-data` (QR code, passport lookup)
+- **Emergency:** `/api/v1/emergency` (city filter, contacts)
+- **Cron Jobs:** `/api/v1/cronJob/deleteExpiredVisaUsers`
 
-- POST `/signup` - Register new user
-- POST `/login` - Authenticate user
-- POST `/forgotPassword` - Initiate password reset
-- POST `/verifyResetCode` - Verify reset code
-- PUT `/resetpassword` - Set new password
+## Error Handling & Rate Limiting
 
-#### Users (`/api/v1/users`)
-
-- GET `/` - List all users (admin)
-- GET `/myProfile` - Get current user profile
-- PUT `/updateMyProfile` - Update user information
-- DELETE `/:id` - Delete user account
-
-#### Weather (`/api/v1/weather`)
-
-- GET `/:lat/:lon` - Get weather information
-  - Current conditions
-  - Daily forecast
-  - Temperature breakdowns
-
-#### Prayer Times (`/api/v1/prayTimes`)
-
-- GET `/:lat/:lon` - Get prayer times
-  - Five daily prayers
-  - Qibla direction
-  - Timezone adjusted
-
-#### Data Access (`/api/v1/get-data`)
-
-- GET `/Qrcode` - Access QR code data
-- GET `/:passport` - Lookup by passport
-
-#### Emergency Services (`/api/v1/emergency`)
-
-- GET `/` - Get all emergency services information
-  - Filter by city using query parameter
-  - Includes hospitals, police stations, and ambulance services
-  - Contact information and locations
-  - Unified emergency numbers
-
-#### Cron Jobs (`/api/v1/cronJob`)
-
-- GET `/deleteExpiredVisaUsers` - Automated visa expiration handling
-  - Deletes user accounts with expired visas
-  - Sends email notifications
-  - Cleans up associated cloud resources
-
-### Error Handling
-
-The API implements comprehensive error handling:
-
-- Validation errors
-- Authentication errors
-- Resource not found
-- Server errors
-- Custom error messages
-
-### Rate Limiting
-
-- **Limit**: 500 requests per 5 minutes
-- **Per**: IP address
-- **Headers**: X-RateLimit-Limit, X-RateLimit-Remaining
+- Comprehensive error responses (validation, auth, not found, server)
+- 500 requests/5min/IP (X-RateLimit headers)
 
 ## Development
 
-### Running Tests
+- Run tests: `npm test`
+- Code style: Airbnb JavaScript Style Guide
 
-```bash
-npm test
-```
+## Contributing
 
-### Code Style
-
-The project follows the Airbnb JavaScript Style Guide.
-
-### Contributing
-
-1. Fork the repository
-2. Create feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit changes (`git commit -m 'Add AmazingFeature'`)
-4. Push to branch (`git push origin feature/AmazingFeature`)
-5. Open Pull Request
+1. Fork the repo
+2. Create a feature branch (`git checkout -b feature/YourFeature`)
+3. Commit (`git commit -m 'Add YourFeature'`)
+4. Push (`git push origin feature/YourFeature`)
+5. Open a Pull Request
 
 ## Support
 
-For support, email support@tawaafapp.com or open an issue on GitHub.
-
-## License
-
-This project is licensed under the ISC License. See [LICENSE](LICENSE) for details.
+- Email: support@tawaafapp.com
+- Or open a GitHub issue
 
 ## Acknowledgments
 
-- Tomorrow.io for weather data
-- Adhan.js for prayer calculations
-- Cloudinary for image hosting
-- MongoDB Atlas for database hosting
+- Tomorrow.io (weather)
+- Adhan.js (prayer times)
+- Cloudinary (image hosting)
+- MongoDB Atlas (database)

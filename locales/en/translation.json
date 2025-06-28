@@ -8,17 +8,47 @@
         "sunset": "Sunset",
         "description": "Description",
         "dayName": {
-        "Saturday": "Saturday",
-        "Sunday": "Sunday",
-        "Monday": "Monday",
-        "Tuesday": "Tuesday",
-        "Wednesday": "Wednesday",
-        "Thursday": "Thursday",
-        "Friday": "Friday"
+            "Saturday": "Saturday",
+            "Sunday": "Sunday",
+            "Monday": "Monday",
+            "Tuesday": "Tuesday",
+            "Wednesday": "Wednesday",
+            "Thursday": "Thursday",
+            "Friday": "Friday"
         },
         "weatherDescription": {
             "Clear, sunny": "Clear, sunny",
-            "Cloudy with hot temperatures and dry conditions": "Cloudy with hot temperatures and dry conditions"
+            "Mostly clear": "Mostly clear",
+            "Partly cloudy": "Partly cloudy",
+            "Mostly cloudy": "Mostly cloudy",
+            "Cloudy": "Cloudy",
+            "Fog": "Fog",
+            "Light fog": "Light fog",
+            "Drizzle": "Drizzle",
+            "Rain": "Rain",
+            "Light rain": "Light rain",
+            "Heavy rain": "Heavy rain",
+            "Snow": "Snow",
+            "Flurries": "Flurries",
+            "Light snow": "Light snow",
+            "Heavy snow": "Heavy snow",
+            "Freezing drizzle": "Freezing drizzle",
+            "Freezing rain": "Freezing rain",
+            "Light freezing rain": "Light freezing rain",
+            "Heavy freezing rain": "Heavy freezing rain",
+            "Ice pellets": "Ice pellets",
+            "Heavy ice pellets": "Heavy ice pellets",
+            "Light ice pellets": "Light ice pellets",
+            "Thunderstorm": "Thunderstorm",
+            "Unknown": "Unknown",
+            "hot": "hot",
+            "warm": "warm",
+            "cool": "cool",
+            "cold": "cold",
+            "high chance of precipitation": "high chance of precipitation",
+            "moderate chance of precipitation": "moderate chance of precipitation",
+            "slight chance of precipitation": "slight chance of precipitation",
+            "dry conditions": "dry conditions"
         },
         "timeOfDay": {
             "morning": "Morning",
@@ -61,18 +91,308 @@
         "alive": "Alive"
     },
     "emergency": {
-        "hospitals": "Hospitals",
-        "police": "Police",
-        "ambulance": "Ambulance",
-        "unified_numbers": {
-        "security_patrols": "Security Patrols",
-        "civil_defense": "Civil Defense",
-        "road_security": "Road Security",
-        "traffic": "Traffic",
-        "passport": "Passport",
-        "drug_control": "Drug Control",
-        "water_emergency": "Water Emergency",
-        "electricity_emergency": "Electricity Emergency"
+        "cities": {
+            "mecca": "Mecca",
+            "medina": "Medina"
+        },
+        "hospitals": {
+            "681cc8a37be1d1683e01e685": {
+                "name": "King Abdullah Medical City",
+                "location": "Almashair Street, Mecca 24246"
+            },
+            "681cc8a37be1d1683e01e686": {
+                "name": "Alnoor Specialist",
+                "location": "3rd Ring Rd, Mecca 24241"
+            },
+            "681cc8a37be1d1683e01e687": {
+                "name": "King Faisal Specialist",
+                "location": "Grand Mosque Road, Al-Shasha District"
+            },
+            "681cc8a37be1d1683e01e688": {
+                "name": "Heraa General",
+                "location": "Medina Road, Al-Azizia district"
+            },
+            "681cc9136043a362d9d5eafc": {
+                "name": "King Fahad Armed Forces",
+                "location": "King Khalid Road, Al-Jamaa District"
+            },
+            "681cc9136043a362d9d5eafd": {
+                "name": "Saudi German",
+                "location": "Al Salam Road, Al Salam District"
+            },
+            "681cc9136043a362d9d5eafe": {
+                "name": "Al Zahraa",
+                "location": "Ali bin Abi Talib, Medina 42316"
+            },
+            "681cc9136043a362d9d5eaff": {
+                "name": "Medina National",
+                "location": "Al-Sharabat, Prince Abdul Majeed bin Abdulaziz"
+            }
+        },
+        "police": {
+            "stations": {
+                "681cc8a37be1d1683e01e68b": {
+                    "name": "Al-Azizia Police Station",
+                    "location": "Al-Azizia Street, Al-Azizia district"
+                },
+                "681cc8a37be1d1683e01e68c": {
+                    "name": "Al-Kaikiya Police Station",
+                    "location": "Al Shawqiyyah, Mecca 24351"
+                },
+                "681cc8a37be1d1683e01e68d": {
+                    "name": "Al Qarara Police Station",
+                    "location": "Grand Mosque Road, Sulaymaniyah"
+                },
+                "681cc9136043a362d9d5eb02": {
+                    "name": "Quba Police Station",
+                    "location": "Khallad bin Rafi, Urwa, Medina 42391"
+                },
+                "681cc9136043a362d9d5eb03": {
+                    "name": "Airport Police Station",
+                    "location": "Al-Tufayl bin Saeed Al-Najari, The Envoy"
+                },
+                "681cc9136043a362d9d5eb04": {
+                    "name": "Uhud Police Station",
+                    "location": "Prince Abdul Majeed bin Abdulaziz"
+                }
+            }
         }
+    },
+    "aroundYou": {
+        "cities": {
+            "mecca": "Mecca",
+            "medina": "Medina"
+        },
+        "restaurants": {
+            "68343711749c9bed0d26490f": {
+                "name": "Al Baik - Al Haram",
+                "typeOfFood": "Fast Food and Popular Food",
+                "workSchedules": "9:00 AM : 2:00 AM",
+                "location": "In front of the Holy Mosque in Mecca"
+            },
+            "68343711749c9bed0d264910": {
+                "name": "Turkish Taste",
+                "typeOfFood": "Turkish Food",
+                "workSchedules": "6:00 AM : 1:00 AM",
+                "location": "Ibrahim Al Joufaili, Makkah 24372"
+            },
+            "68343711749c9bed0d264911": {
+                "name": "Al Shurfa",
+                "typeOfFood": "Oriental and Arab Food",
+                "workSchedules": "11:00 AM : 12:00 AM",
+                "location": "Royal Tower, Ajyad St"
+            },
+            "68343711749c9bed0d264912": {
+                "name": "Al Rehab",
+                "typeOfFood": "International Food",
+                "workSchedules": "12:30 PM : 3:30 PM - 7:00 PM : 10:30 PM",
+                "location": "InterContinental Dar al Tawhid Hotel"
+            },
+            "68343711749c9bed0d264913": {
+                "name": "Al Baik - Al Shoqiyah",
+                "typeOfFood": "Fast Food and Popular Food",
+                "workSchedules": "11:00 AM : 2:00 AM",
+                "location": "Sheikh Muhammad Bin Jubair, Al Shoqiyah"
+            },
+            "68343711749c9bed0d264924": {
+                "name": "Shing Yang Chinese",
+                "typeOfFood": "Chinese Food",
+                "workSchedules": "1:00 PM : 2:00 AM",
+                "location": "Saeed bin Sufyan Al-Qari district"
+            },
+            "68343711749c9bed0d264925": {
+                "name": "Al Baik",
+                "typeOfFood": "Fast Food and Popular Food",
+                "workSchedules": "9:00 AM : 2:00 AM",
+                "location": "King Faisal Rd, Madinah 42311"
+            },
+            "68343711749c9bed0d264926": {
+                "name": "Arabesque",
+                "typeOfFood": "International Food",
+                "workSchedules": "6:00 AM : 11:00 AM",
+                "location": "Bada'ah, Madinah 42311"
+            },
+            "68343711749c9bed0d264927": {
+                "name": "Abu Zaid",
+                "typeOfFood": "Popular Food",
+                "workSchedules": "6:00 AM : 12:00 PM - 6:00 PM : 2:00 AM",
+                "location": "Prince Abdul Majeed bin Abdulaziz"
+            },
+            "68343711749c9bed0d264928": {
+                "name": "Social House",
+                "typeOfFood": "International Food",
+                "workSchedules": "5:00 PM : 11:00 PM",
+                "location": "Sultana Road, Al Qiblatayn, Madinah 42351"
+            }
+        },
+        "cafes": {
+            "68343711749c9bed0d264914": {
+                "name": "Al Tekkeya",
+                "workSchedules": "7:00 AM : 11:00 PM",
+                "location": "Ibrahim Al Khalil, Makkah 21955"
+            },
+            "68343711749c9bed0d264915": {
+                "name": "Caffe Aroma",
+                "workSchedules": "10:00 AM : 1:00 AM",
+                "location": "Al-Hamra'a, Jeddah"
+            },
+            "68343711749c9bed0d264916": {
+                "name": "Orta",
+                "workSchedules": "5:00 AM : 1:00 AM",
+                "location": "Prince Saud Bin Mohammed Bin Muqrin Rd"
+            },
+            "68343711749c9bed0d264917": {
+                "name": "Hadiqat Laila",
+                "workSchedules": "24 hours a day",
+                "location": "King Abdulaziz Road, Al Zahraa District"
+            },
+            "68343711749c9bed0d264918": {
+                "name": "Dose",
+                "workSchedules": "6:00 AM : 2:00 AM",
+                "location": "Abdullah Sulayman St, Jeddah"
+            },
+            "68343711749c9bed0d264929": {
+                "name": "Etruh",
+                "workSchedules": "5:00 PM : 2:00 AM",
+                "location": "Salem Bin Yazid, Medina 42315"
+            },
+            "68343711749c9bed0d26492a": {
+                "name": "Row Specialty",
+                "workSchedules": "24 hours a day",
+                "location": "King Abdullah Rd, Mudhainib"
+            },
+            "68343711749c9bed0d26492b": {
+                "name": "Kiffah",
+                "workSchedules": "6:30 AM : 12:30 AM",
+                "location": "King Abdullah Branch Road, Shadha"
+            },
+            "68343711749c9bed0d26492c": {
+                "name": "Lider",
+                "workSchedules": "10:00 AM : 12:00 AM",
+                "location": "Bada'ah, Medina 42311"
+            },
+            "68343711749c9bed0d26492d": {
+                "name": "Shalal",
+                "workSchedules": "8:00 AM : 10:00 PM",
+                "location": "Medina 43571"
+            }
+        },
+        "supermarkets": {
+            "68343711749c9bed0d264919": {
+                "name": "Panda",
+                "workSchedules": "7:00 AM : 1:00 AM",
+                "location": "Ghernatah, Aziziyah, Jeddah"
+            },
+            "68343711749c9bed0d26491a": {
+                "name": "Danube",
+                "workSchedules": "7:00 AM : 2:00 AM",
+                "location": "Ar Rawabi, Riyadh"
+            },
+            "68343711749c9bed0d26491b": {
+                "name": "Tamimi Markets",
+                "workSchedules": "24 hours a day",
+                "location": "Prince Saud Bin Mohammed Bin Muqrin Rd"
+            },
+            "68343711749c9bed0d26491c": {
+                "name": "Othaim Markets",
+                "workSchedules": "7:00 AM : 1:45 AM",
+                "location": "Al Urubah Rd, Riyadh"
+            },
+            "68343711749c9bed0d26491d": {
+                "name": "Farm Markets",
+                "workSchedules": "8:00 AM : 2:00 AM",
+                "location": "7685 Abdallah Ibn Ibrahim Ibn Seif"
+            },
+            "68343711749c9bed0d26492e": {
+                "name": "Mandarin",
+                "workSchedules": "24 hours a day",
+                "location": "7868 Airport Rd, Medina 42322"
+            },
+            "68343711749c9bed0d26492f": {
+                "name": "Al Raya",
+                "workSchedules": "6:00 AM : 3:00 AM",
+                "location": "Qassim Road, Medina 42319"
+            },
+            "68343711749c9bed0d264930": {
+                "name": "Tamimi Markets",
+                "workSchedules": "24 hours a day",
+                "location": "Al Abbas Ibn Ubadah, Ar Ranuna"
+            },
+            "68343711749c9bed0d264931": {
+                "name": "Al Khair central markets",
+                "workSchedules": "24 hours a day",
+                "location": "Ar Ranuna, Medina 42394"
+            },
+            "68343711749c9bed0d264932": {
+                "name": "Al-Madina Central Markets",
+                "workSchedules": "24 hours a day",
+                "location": "Imam Bukhari, Al-Aziziyah, Ad Difa"
+            }
+        },
+        "hotels": {
+            "68343711749c9bed0d26491e": {
+                "name": "Golden Fairmont",
+                "category": "5-star hotel",
+                "location": "Abraj Al Bait, Al Haram"
+            },
+            "68343711749c9bed0d26491f": {
+                "name": "InterContinental Dar al Tawhid",
+                "category": "5-star hotel",
+                "location": "Ibrahim Al Khalil Rd, Al Haram"
+            },
+            "68343711749c9bed0d264920": {
+                "name": "Razana Al Rawdha",
+                "category": "4-star hotel",
+                "location": "Al Masjid Al Haram Rd, Ar Rawdah"
+            },
+            "68343711749c9bed0d264921": {
+                "name": "Jiwar al Bayt",
+                "category": "3-star hotel",
+                "location": "Al-Mutawaf Street, Alaziziyyah"
+            },
+            "68343711749c9bed0d264922": {
+                "name": "Elaf Ajyad",
+                "category": "2-star hotel",
+                "location": "Ajyad, Makkah 24231"
+            },
+            "68343711749c9bed0d264933": {
+                "name": "Dar Al-Taqwa",
+                "category": "5-star hotel",
+                "location": "Al Sitteen Street, Near Masjid Al Nabawi"
+            },
+            "68343711749c9bed0d264934": {
+                "name": "Al Eiman Royal",
+                "category": "5-star hotel",
+                "location": "King Faisal Rd, Bada'ah, Medina 42311"
+            },
+            "68343711749c9bed0d264935": {
+                "name": "Zowar International",
+                "category": "4-star hotel",
+                "location": "Al Haram, Bada'ah, Medina 42311"
+            },
+            "68343711749c9bed0d264936": {
+                "name": "New Medina",
+                "category": "3-star hotel",
+                "location": "Abi Sayeed Al Khudri Street, Medina 41441"
+            },
+            "68343711749c9bed0d264937": {
+                "name": "Golden Diamond Apartments",
+                "category": "2-star hotel",
+                "location": "Masjid Ad Dar, Madinah 42313"
+            }
+        }
+    },
+    "error": {
+        "missingCoordinates": "Latitude and longitude are required in the request parameters",
+        "invalidLatitude": "Invalid latitude value. Must be between -90 and 90",
+        "invalidLongitude": "Invalid longitude value. Must be between -180 and 180",
+        "rateLimitExceeded": "Rate limit exceeded. Please try again later.",
+        "failedToFetchWeather": "Failed to fetch weather data",
+        "dailyWeatherDataNotFound": "Daily weather data not found in response",
+        "hourlyForecastDataNotFound": "Hourly forecast data not found in response",
+        "noEmergenciesFound": "No emergencies found for this city",
+        "failedToFetchEmergencies": "Failed to fetch emergency data",
+        "noDataFound": "No data found for this city",
+        "failedToFetchData": "Failed to fetch data"
     }
 }
