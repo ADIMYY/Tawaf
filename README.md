@@ -164,11 +164,6 @@ Full API docs: [Postman Collection](https://documenter.getpostman.com/view/30662
 4. Push (`git push origin feature/YourFeature`)
 5. Open a Pull Request
 
-## Support
-
-- Email: support@tawaafapp.com
-- Or open a GitHub issue
-
 ## Acknowledgments
 
 - Tomorrow.io (weather)
