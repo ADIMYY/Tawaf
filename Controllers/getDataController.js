@@ -5,6 +5,7 @@ import { getProfileTemplate } from "../templates/profileTemplate.js";
 
 const userFields = 'location photo name nationality state passPortNumber birthDate maritalStatus myDiseases medicinesName relativePhone companyNumber companyName relationship alive userPhone';
 
+// Controller to get user data by passport number
 export const getUserByPassport = asyncHandler(async (req, res, next) => {
     const user = await User.findOne({ passPortNumber: req.params.passport }).select(userFields);
     
@@ -15,6 +16,7 @@ export const getUserByPassport = asyncHandler(async (req, res, next) => {
     res.status(200).json({ status: 'success', data: user });
 });
 
+// Controller to get user data from QR code
 export const getDataFromQrcode = asyncHandler(async (req, res, next) => {
     const user = await User.findById(req.query.id);
     if (!user) {
@@ -23,6 +25,7 @@ export const getDataFromQrcode = asyncHandler(async (req, res, next) => {
     res.status(200).send(getProfileTemplate(user));
 });
 
+// Controller to get user data by ID
 export const getDataById = asyncHandler(async (req, res, next) => {
     const user = await User.findById(req.params.id).select(userFields);
 
