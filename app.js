@@ -89,6 +89,7 @@ const initializeApp = () => {
     app.use(express.json({ limit: '10kb' }));
     app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 
+    //! i18next middleware for internationalization
     app.use(i18nextMiddleware.handle(i18next));
 
     //! Logging
