@@ -2,6 +2,7 @@ import asyncHandler from "express-async-handler";
 import tzlookup from "tz-lookup";
 import axios from "axios";
 import dotenv from 'dotenv';
+import { reverseGeocode } from "../Utils/geocode.js";
 
 // Load environment variables
 dotenv.config();
@@ -382,10 +383,10 @@ export const getWeather = asyncHandler(async (req, res, next) => {
             [t('weather.timeOfDay.night')]: currentDayTemps[t('weather.timeOfDay.night')]?.avg || hourlyForecasts[t('weather.timeOfDay.night')] || formatters.temperature(dailyTemperatures[0]?.temperature?.avg, lang) || null
         };
 
-        const timeZone = tzlookup(latitude, longitude);
+        const locationData = await reverseGeocode(latitude, longitude, lang);
         
         const responseData = {
-            location: timeZone,
+            location: `${locationData.city}, ${locationData.country}`,
             current,
             dailyTemperatures,
             currentDayTemperatures,

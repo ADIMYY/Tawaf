@@ -2,12 +2,18 @@ import asyncHandler from "express-async-handler";
 import { PrayerTimes, CalculationMethod, Coordinates } from 'adhan';
 import appError from "../Utils/appError.js";
 import tzlookup from 'tz-lookup'; // To dynamically get the timezone based on coordinates
+import { reverseGeocode } from "../Utils/geocode.js";
 
 // Helper function to format prayer times
 const formatTime = (time, timeZone, lang) => {
-    return time
-        ? time.toLocaleTimeString(lang === 'ar' ? 'ar-EG' : 'en-US', { timeZone, hour12: true })
-        : null;
+    if (!time) return null;
+
+    return time.toLocaleTimeString(lang === 'ar' ? 'ar-EG' : 'en-US', {
+        timeZone,
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true
+    });
 };
 
 // Controller to get prayer times for any place based on latitude and longitude
@@ -49,10 +55,13 @@ export const getPrayTimes = asyncHandler(async (req, res, next) => {
             [t('prayTimes.isha')]: formatTime(prayerTimes.isha, timeZone, lang),
         };
 
+        const locationData = await reverseGeocode(latitude, longitude, lang);
+
         // Send response
         res.status(200).json({
             status: 'success',
             data: {
+                location: `${locationData.city}, ${locationData.country}`,
                 prayerTimes: formattedPrayerTimes,
             },
         });
