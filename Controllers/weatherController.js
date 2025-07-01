@@ -327,16 +327,11 @@ const weatherClient = {
 
 // Controller to get weather data
 export const getWeather = asyncHandler(async (req, res, next) => {
-    let t = (key) => key; // Fallback translation function
-    let lang = req.query.lng || 'en';
     try {
-        // Set up translation
-        if (req.i18n && req.t) {
-            req.i18n.changeLanguage(lang);
-            t = req.t;
-        } else {
-            console.warn('i18next middleware not properly initialized');
-        }
+        // Extract language from query parameter (e.g., ?lng=en or ?lng=ar)
+        const lang = req.query.lng || 'en'; // Default to English if no language is provided
+        req.i18n.changeLanguage(lang); // Change language based on query parameter
+        const t = req.t; // i18next translation function
 
         // Extract latitude and longitude from request parameters
         const { lat, lon } = req.params;

@@ -6,9 +6,7 @@ import { getProfileTemplate } from "../templates/profileTemplate.js";
 const userFields = 'location photo name nationality state passPortNumber birthDate maritalStatus myDiseases medicinesName relativePhone companyNumber companyName relationship alive userPhone';
 
 
-// utils/userHelpers.js
-
-export const localizeUser = (user, t) => {
+const localizeUser = (user, t) => {
     if (!user) return null;
 
     const localizedUser = { ...user.toObject() };
@@ -19,7 +17,6 @@ export const localizeUser = (user, t) => {
 
     return localizedUser;
 };
-
 
 // Controller to get user data by passport number
 export const getUserByPassport = asyncHandler(async (req, res, next) => {
