@@ -9,39 +9,39 @@ dotenv.config();
 
 // Constants
 const TOMORROW_API_CONFIG = {
-    BASE_URL: 'https://api.tomorrow.io/v4/weather/forecast',
+    BASE_URL: 'https://api.tomorrow.io/v4/weather/forecast ',
     API_KEY: process.env.WEATHER_API_KEY || 'OjVUTgatB1eWcTaiU6LQFmA4otnVT0uI',
 };
 
 const weatherIcons = {
-    snowyWindyClouds: 'https://res.cloudinary.com/dyd5lvwhc/image/upload/v1744023691/1_zwgvxp.png',
-    partlySunnyWithRain: 'https://res.cloudinary.com/dyd5lvwhc/image/upload/v1744023690/2_gqgpf3.png',
-    partlySunnyWithThunderstorms: 'https://res.cloudinary.com/dyd5lvwhc/image/upload/v1744023693/3_zzuqh3.png',
-    cloudyWithSnow: 'https://res.cloudinary.com/dyd5lvwhc/image/upload/v1744023692/4_lu5a3x.png',
-    sunnyClearSky: 'https://res.cloudinary.com/dyd5lvwhc/image/upload/v1744023693/5_lzbeao.png',
-    overcastClouds: 'https://res.cloudinary.com/dyd5lvwhc/image/upload/v1744023692/6_pon5zm.png',
-    partlySunnyWithRain2: 'https://res.cloudinary.com/dyd5lvwhc/image/upload/v1744023693/7_hix73d.png',
+    snowyWindyClouds: 'https://res.cloudinary.com/dyd5lvwhc/image/upload/v1744023691/1_zwgvxp.png ',
+    partlySunnyWithRain: 'https://res.cloudinary.com/dyd5lvwhc/image/upload/v1744023690/2_gqgpf3.png ',
+    partlySunnyWithThunderstorms: 'https://res.cloudinary.com/dyd5lvwhc/image/upload/v1744023693/3_zzuqh3.png ',
+    cloudyWithSnow: 'https://res.cloudinary.com/dyd5lvwhc/image/upload/v1744023692/4_lu5a3x.png ',
+    sunnyClearSky: 'https://res.cloudinary.com/dyd5lvwhc/image/upload/v1744023693/5_lzbeao.png ',
+    overcastClouds: 'https://res.cloudinary.com/dyd5lvwhc/image/upload/v1744023692/6_pon5zm.png ',
+    partlySunnyWithRain2: 'https://res.cloudinary.com/dyd5lvwhc/image/upload/v1744023693/7_hix73d.png ',
 };
 
 // Utility functions
 const formatters = {
     windSpeed: (speedInMS, lang) => {
-        const value = (speedInMS * 3.6).toFixed(1);
+        const value = speedInMS ? (speedInMS * 3.6).toFixed(1) : '0.0';
         return lang === 'ar' ? value.replace(/[0-9]/g, (d) => '٠١٢٣٤٥٦٧٨٩'[d]) : value;
     },
     percentage: (value, lang) => {
-        const formatted = parseFloat(value).toFixed(1);
+        const formatted = parseFloat(value ?? 0).toFixed(1);
         return lang === 'ar' ? formatted.replace(/[0-9]/g, (d) => '٠١٢٣٤٥٦٧٨٩'[d]) : formatted;
     },
     temperature: (value, lang) => {
-        const formatted = parseFloat(value).toFixed(1);
+        const formatted = parseFloat(value ?? 0).toFixed(1);
         return lang === 'ar' ? formatted.replace(/[0-9]/g, (d) => '٠١٢٣٤٥٦٧٨٩'[d]) : formatted;
     },
     time: (isoString, lat, lon, lang) => {
-        if (!isoString) return null;
+        if (!isoString) return lang === 'ar' ? '—' : '--';
         try {
             const date = new Date(isoString);
-            if (isNaN(date.getTime())) return null; // Fixed typo (Vaz -> return null)
+            if (isNaN(date.getTime())) return lang === 'ar' ? 'غير معروف' : 'Unknown';
             const timeZone = tzlookup(lat, lon);
             return date.toLocaleTimeString(lang === 'ar' ? 'ar-EG' : 'en-US', {
                 timeZone,
@@ -51,9 +51,17 @@ const formatters = {
             });
         } catch (error) {
             console.error('Error formatting time:', error.message);
-            return null;
+            return lang === 'ar' ? 'خطأ في الوقت' : 'Time error';
         }
     }
+};
+
+// Get day part based on hour
+const getDayPart = (hour, t) => {
+    if (hour >= 5 && hour < 12) return t('weather.timeOfDay.morning') ?? 'Morning';
+    if (hour >= 12 && hour < 17) return t('weather.timeOfDay.afternoon') ?? 'Afternoon';
+    if (hour >= 17 && hour < 22) return t('weather.timeOfDay.evening') ?? 'Evening';
+    return t('weather.timeOfDay.night') ?? 'Night';
 };
 
 // Weather code to description mapping
@@ -83,7 +91,7 @@ const getWeatherDescription = (weatherCode, t) => {
         7102: t('weather.weatherDescription.Light ice pellets'),
         8000: t('weather.weatherDescription.Thunderstorm'),
     };
-    return descriptions[weatherCode] || t('weather.weatherDescription.Unknown');
+    return descriptions[weatherCode] ?? t('weather.weatherDescription.Unknown') ?? 'Unknown';
 };
 
 // Map weather code to icon URL
@@ -113,42 +121,36 @@ const getWeatherIcon = (weatherCode) => {
         7102: weatherIcons.cloudyWithSnow,
         8000: weatherIcons.partlySunnyWithThunderstorms,
     };
-    return iconMap[weatherCode] || weatherIcons.sunnyClearSky;
-};
-
-// Get day part based on hour
-const getDayPart = (hour, t) => {
-    if (hour >= 5 && hour < 12) return t('weather.timeOfDay.morning');
-    if (hour >= 12 && hour < 17) return t('weather.timeOfDay.afternoon');
-    if (hour >= 17 && hour < 22) return t('weather.timeOfDay.evening');
-    return t('weather.timeOfDay.night');
+    return iconMap[weatherCode] ?? weatherIcons.sunnyClearSky;
 };
 
 // Generate current weather description
 const getCurrentWeatherDescription = (data, t, lang) => {
     const baseDescription = getWeatherDescription(data.weatherCode, t);
     let tempDescription = '';
-    const temperature = parseFloat(data[t('weather.temperature')]);
+    const temperature = parseFloat(data[t('weather.temperature')] ?? 0);
     if (temperature >= 30) {
-        tempDescription = t('weather.weatherDescription.hot');
+        tempDescription = t('weather.weatherDescription.hot') ?? 'hot';
     } else if (temperature >= 20) {
-        tempDescription = t('weather.weatherDescription.warm');
+        tempDescription = t('weather.weatherDescription.warm') ?? 'warm';
     } else if (temperature >= 10) {
-        tempDescription = t('weather.weatherDescription.cool');
+        tempDescription = t('weather.weatherDescription.cool') ?? 'cool';
     } else {
-        tempDescription = t('weather.weatherDescription.cold');
+        tempDescription = t('weather.weatherDescription.cold') ?? 'cold';
     }
+
     let precipDescription = '';
-    const rainChance = parseFloat(data[t('weather.rainChance')]);
+    const rainChance = parseFloat(data[t('weather.rainChance')] ?? 0);
     if (rainChance > 70) {
-        precipDescription = t('weather.weatherDescription.high chance of precipitation');
+        precipDescription = t('weather.weatherDescription.high chance of precipitation') ?? 'high chance of precipitation';
     } else if (rainChance > 30) {
-        precipDescription = t('weather.weatherDescription.moderate chance of precipitation');
+        precipDescription = t('weather.weatherDescription.moderate chance of precipitation') ?? 'moderate chance of precipitation';
     } else if (rainChance > 10) {
-        precipDescription = t('weather.weatherDescription.slight chance of precipitation');
+        precipDescription = t('weather.weatherDescription.slight chance of precipitation') ?? 'slight chance of precipitation';
     } else {
-        precipDescription = t('weather.weatherDescription.dry conditions');
+        precipDescription = t('weather.weatherDescription.dry conditions') ?? 'dry conditions';
     }
+
     return lang === 'ar'
         ? `${baseDescription} مع درجات حرارة ${tempDescription} و${precipDescription}`
         : `${baseDescription} with ${tempDescription} temperatures and ${precipDescription}`;
@@ -168,24 +170,30 @@ const weatherClient = {
             timesteps: 'daily',
             fields: ['temperature', 'windSpeed', 'humidity', 'precipitationProbability', 'sunriseTime', 'sunsetTime', 'weatherCode']
         });
+
         const dailyData = response.timelines.daily[0]?.values;
-        if (!dailyData) throw new Error(t('error.dailyWeatherDataNotFound') || 'Daily weather data not found');
+        if (!dailyData) throw new Error(t('error.dailyWeatherDataNotFound') ?? 'Daily weather data not found');
+
         const minutelyResponse = await this.fetchWeatherData(lat, lon, {
             timesteps: 'minutely',
             fields: ['temperature', 'windSpeed', 'humidity', 'precipitationProbability', 'weatherCode']
         });
+
         const minutelyData = minutelyResponse.timelines.minutely[0]?.values;
-        const weatherCode = minutelyData.weatherCode || dailyData.weatherCode;
+
+        const weatherCode = minutelyData?.weatherCode ?? dailyData?.weatherCode ?? 1000;
+
         const currentData = {
-            [t('weather.temperature')]: formatters.temperature(minutelyData.temperature, lang),
-            [t('weather.windSpeed')]: formatters.windSpeed(minutelyData.windSpeed, lang),
-            [t('weather.humidity')]: formatters.percentage(minutelyData.humidity, lang),
-            [t('weather.rainChance')]: formatters.percentage(minutelyData.precipitationProbability, lang),
-            [t('weather.sunrise')]: formatters.time(dailyData.sunriseTime, lat, lon, lang),
-            [t('weather.sunset')]: formatters.time(dailyData.sunsetTime, lat, lon, lang),
+            [t('weather.temperature')]: formatters.temperature(minutelyData?.temperature ?? 0, lang),
+            [t('weather.windSpeed')]: formatters.windSpeed(minutelyData?.windSpeed ?? 0, lang),
+            [t('weather.humidity')]: formatters.percentage(minutelyData?.humidity ?? 0, lang),
+            [t('weather.rainChance')]: formatters.percentage(minutelyData?.precipitationProbability ?? 0, lang),
+            [t('weather.sunrise')]: formatters.time(dailyData?.sunriseTime, lat, lon, lang),
+            [t('weather.sunset')]: formatters.time(dailyData?.sunsetTime, lat, lon, lang),
             weatherCode: weatherCode,
             icon: getWeatherIcon(weatherCode),
         };
+
         return {
             ...currentData,
             [t('weather.description')]: getCurrentWeatherDescription(currentData, t, lang),
@@ -198,107 +206,32 @@ const weatherClient = {
             endTime: 'nowPlus7d',
             fields: ['temperature', 'weatherCode', 'sunriseTime', 'sunsetTime', 'precipitationProbability']
         });
+
         return response.timelines.daily.map(day => {
             const date = new Date(day.time);
-            const precipitationProbability = day.values.precipitationProbability;
-            const rainChance = precipitationProbability !== null && !isNaN(precipitationProbability)
-                ? formatters.percentage(precipitationProbability, lang)
-                : lang === 'ar' ? "٠٫٠" : "0.0";
+            const dayKey = date.toLocaleDateString('en-US', { weekday: 'long' });
+            const localizedDay = t(`weather.dayName.${dayKey}`) ?? dayKey;
+
+            const precipitationProbability = day.values.precipitationProbability ?? 0;
+            const rainChance = formatters.percentage(precipitationProbability, lang);
+
             return {
-                [t('weather.dayName', { returnObjects: true })[date.toLocaleDateString('en-US', { weekday: 'long' })] || date.toLocaleDateString('en-US', { weekday: 'long' })]: {
+                [localizedDay]: {
                     date: date.toLocaleDateString(lang === 'ar' ? 'ar-EG' : 'en-US'),
                     temperature: {
-                        avg: formatters.temperature(day.values.temperatureAvg, lang),
-                        max: formatters.temperature(day.values.temperatureMax, lang),
-                        min: formatters.temperature(day.values.temperatureMin, lang)
+                        avg: formatters.temperature(day.values.temperatureAvg ?? 0, lang),
+                        max: formatters.temperature(day.values.temperatureMax ?? 0, lang),
+                        min: formatters.temperature(day.values.temperatureMin ?? 0, lang)
                     },
-                    weatherCode: day.values.weatherCode || day.values.weatherCodeMax,
-                    [t('weather.description')]: getWeatherDescription(day.values.weatherCode || day.values.weatherCodeMax, t),
-                    icon: getWeatherIcon(day.values.weatherCode || day.values.weatherCodeMax),
+                    weatherCode: day.values.weatherCode ?? day.values.weatherCodeMax ?? 1000,
+                    [t('weather.description')]: getWeatherDescription(day.values.weatherCode ?? 1000, t),
+                    icon: getWeatherIcon(day.values.weatherCode ?? 1000),
                     [t('weather.sunrise')]: formatters.time(day.values.sunriseTime, lat, lon, lang),
                     [t('weather.sunset')]: formatters.time(day.values.sunsetTime, lat, lon, lang),
                     [t('weather.rainChance')]: rainChance
                 }
             };
         });
-    },
-    async getHourlyForecastForToday(lat, lon, t, lang) {
-        const response = await this.fetchWeatherData(lat, lon, {
-            timesteps: '1h',
-            startTime: 'now',
-            endTime: 'nowPlus1d',
-            fields: ['temperature']
-        });
-        if (!response.timelines?.hourly || response.timelines.hourly.length === 0) {
-            throw new Error(t('error.hourlyForecastDataNotFound') || 'Hourly forecast data not found');
-        }
-        const dayPartForecasts = {
-            [t('weather.timeOfDay.morning')]: [],
-            [t('weather.timeOfDay.afternoon')]: [],
-            [t('weather.timeOfDay.evening')]: [],
-            [t('weather.timeOfDay.night')]: []
-        };
-        response.timelines.hourly.forEach(hour => {
-            const date = new Date(hour.time);
-            const utcHour = date.getUTCHours();
-            const timezoneOffset = Math.round(lon / 15);
-            const localHour = (utcHour + timezoneOffset + 24) % 24;
-            const dayPart = getDayPart(localHour, t);
-            dayPartForecasts[dayPart].push(hour.values.temperature);
-        });
-        const result = {};
-        Object.keys(dayPartForecasts).forEach(part => {
-            const temps = dayPartForecasts[part];
-            result[part] = temps.length > 0
-                ? formatters.temperature(
-                    (temps.reduce((sum, temp) => sum + temp, 0) / temps.length).toFixed(1),
-                    lang
-                  )
-                : null;
-        });
-        return result;
-    },
-    async getDayPartTemperatures(lat, lon, t, lang) {
-        const response = await this.fetchWeatherData(lat, lon, {
-            timesteps: '1h',
-            startTime: 'now',
-            endTime: 'nowPlus7d',
-            fields: ['temperature']
-        });
-        const hourlyData = response.timelines.hourly;
-        if (!hourlyData || hourlyData.length === 0) {
-            throw new Error(t('error.hourlyForecastDataNotFound') || 'Hourly forecast data not found');
-        }
-        const dailyPartTemps = {};
-        hourlyData.forEach(hour => {
-            const date = new Date(hour.time);
-            const dayKey = date.toISOString().split('T')[0];
-            const utcHour = date.getUTCHours();
-            const timezoneOffset = Math.round(lon / 15);
-            const localHour = (utcHour + timezoneOffset + 24) % 24;
-            const dayPart = getDayPart(localHour, t);
-            if (!dailyPartTemps[dayKey]) {
-                dailyPartTemps[dayKey] = {
-                    [t('weather.timeOfDay.morning')]: { temps: [], avg: null },
-                    [t('weather.timeOfDay.afternoon')]: { temps: [], avg: null },
-                    [t('weather.timeOfDay.evening')]: { temps: [], avg: null },
-                    [t('weather.timeOfDay.night')]: { temps: [], avg: null }
-                };
-            }
-            dailyPartTemps[dayKey][dayPart].temps.push(hour.values.temperature);
-        });
-        Object.keys(dailyPartTemps).forEach(day => {
-            Object.keys(dailyPartTemps[day]).forEach(part => {
-                const temps = dailyPartTemps[day][part].temps;
-                if (temps.length > 0) {
-                    dailyPartTemps[day][part].avg = formatters.temperature(
-                        (temps.reduce((sum, temp) => sum + temp, 0) / temps.length).toFixed(1),
-                        lang
-                    );
-                }
-            });
-        });
-        return dailyPartTemps;
     },
     async fetchWeatherData(lat, lon, params) {
         const retryFetch = async (retries = 3, delay = 1000) => {
@@ -328,83 +261,72 @@ const weatherClient = {
 // Controller to get weather data
 export const getWeather = asyncHandler(async (req, res, next) => {
     try {
-        // Set up translation
-        if (req.i18n && req.t) {
-            req.i18n.changeLanguage(lang);
-            t = req.t;
-        } else {
-            console.warn('i18next middleware not properly initialized');
-        }
+        // Extract language from query parameter (e.g., ?lng=en or ?lng=ar)
+        const lang = req.query.lng || 'en'; // Default to English if no language is provided
+        req.i18n.changeLanguage(lang); // Change language based on query parameter
+        const t = req.t; // i18next translation function
 
         // Extract latitude and longitude from request parameters
         const { lat, lon } = req.params;
+
         // Validate the coordinates
         if (!lat || !lon) {
             return res.status(400).json({
-                error: t('error.missingCoordinates')
+                error: t('error.missingCoordinates') ?? 'Missing coordinates'
             });
         }
+
         // Convert to numbers and validate ranges
         const latitude = Number(lat);
         const longitude = Number(lon);
         if (isNaN(latitude) || latitude < -90 || latitude > 90) {
             return res.status(400).json({
-                error: t('error.invalidLatitude')
+                error: t('error.invalidLatitude') ?? 'Invalid latitude'
             });
         }
         if (isNaN(longitude) || longitude < -180 || longitude > 180) {
             return res.status(400).json({
-                error: t('error.invalidLongitude')
+                error: t('error.invalidLongitude') ?? 'Invalid longitude'
             });
         }
+
         // Check cache
         const cacheKey = `${latitude},${longitude},${lang}`;
         if (cache[cacheKey] && Date.now() - cache[cacheKey].timestamp < 10 * 60 * 1000) {
             return res.status(200).json(cache[cacheKey].data);
         }
+
         // Fetch weather data
-        const [current, dailyTemperatures, dayPartTemps, hourlyForecasts] = await Promise.all([
+        const [current, dailyTemperatures] = await Promise.all([
             weatherClient.getCurrentWeather(latitude, longitude, t, lang),
-            weatherClient.getWeatherForecast(latitude, longitude, t, lang),
-            weatherClient.getDayPartTemperatures(latitude, longitude, t, lang),
-            weatherClient.getHourlyForecastForToday(latitude, longitude, t, lang)
+            weatherClient.getWeatherForecast(latitude, longitude, t, lang)
         ]);
-        // Get today's date formatted as YYYY-MM-DD
-        const today = new Date().toISOString().split('T')[0];
-        // Extract only current day's temperatures from dayPartTemps
-        const currentDayTemps = dayPartTemps[today] || {};
-        // Combine actual recorded temperatures with forecast temperatures for missing parts
-        const currentDayTemperatures = {
-            [t('weather.timeOfDay.morning')]: currentDayTemps[t('weather.timeOfDay.morning')]?.avg || hourlyForecasts[t('weather.timeOfDay.morning')] || formatters.temperature(dailyTemperatures[0]?.temperature?.avg, lang) || null,
-            [t('weather.timeOfDay.afternoon')]: currentDayTemps[t('weather.timeOfDay.afternoon')]?.avg || hourlyForecasts[t('weather.timeOfDay.afternoon')] || formatters.temperature(dailyTemperatures[0]?.temperature?.avg, lang) || null,
-            [t('weather.timeOfDay.evening')]: currentDayTemps[t('weather.timeOfDay.evening')]?.avg || hourlyForecasts[t('weather.timeOfDay.evening')] || formatters.temperature(dailyTemperatures[0]?.temperature?.avg, lang) || null,
-            [t('weather.timeOfDay.night')]: currentDayTemps[t('weather.timeOfDay.night')]?.avg || hourlyForecasts[t('weather.timeOfDay.night')] || formatters.temperature(dailyTemperatures[0]?.temperature?.avg, lang) || null
-        };
 
         const locationData = await reverseGeocode(latitude, longitude, lang);
-        
+
         const responseData = {
             location: `${locationData.city}, ${locationData.country}`,
             current,
             dailyTemperatures,
-            currentDayTemperatures,
             direction: lang === 'ar' ? 'rtl' : 'ltr'
         };
+
         // Update cache
         cache[cacheKey] = {
             timestamp: Date.now(),
             data: responseData
         };
+
         res.status(200).json(responseData);
     } catch (error) {
         console.error('Weather API Error:', error.response?.data || error.message);
         if (error.response?.status === 429) {
             return res.status(429).json({
-                error: t('error.rateLimitExceeded') || 'Rate limit exceeded. Please try again later.'
+                error: t('error.rateLimitExceeded') ?? 'Rate limit exceeded. Please try again later.'
             });
         }
         res.status(500).json({
-            error: t('error.failedToFetchWeather') || 'Failed to fetch weather data',
+            error: t('error.failedToFetchWeather') ?? 'Failed to fetch weather data',
             details: error.response?.data || error.message
         });
     }
