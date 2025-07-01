@@ -66,29 +66,35 @@
         "isha": "isha"
     },
     "user": {
-        "name": "name",
-        "passPortNumber": "passport number",
-        "state": "state",
-        "nationality": "nationality",
-        "birthDate": "birth date",
+        "name": "Name",
+        "photo": "Photo",
+        "userPhone": "Phone Number",
+        "passPortNumber": "Passport Number",
+        "state": "State",
+        "nationality": "Nationality",
+        "birthDate": "Birth Date",
         "maritalStatus": {
-        "bachelor": "bachelor",
-        "single": "single",
-        "married": "married",
-        "divorced": "divorced",
-        "widowed": "widowed"
+            "maritalStatus": "Marital Status",
+            "bachelor": "Bachelor",
+            "single": "Single",
+            "married": "Married",
+            "divorced": "Divorced",
+            "widowed": "Widowed"
         },
         "relationship": {
-        "father": "father",
-        "mother": "mother",
-        "brother": "brother",
-        "sister": "sister"
+            "relationship": "Relationship",
+            "relativePhone": "Relative Phone Number",
+            "father": "Father",
+            "mother": "Mother",
+            "brother": "Brother",
+            "sister": "Sister"
         },
         "myDiseases": "Diseases",
         "medicinesName": "Medicines",
         "companyName": "Company Name",
         "companyNumber": "Company Number",
-        "alive": "Alive"
+        "alive": "Alive",
+        "location": "Location"
     },
     "emergency": {
         "cities": {
@@ -393,6 +399,8 @@
         "noEmergenciesFound": "No emergencies found for this city",
         "failedToFetchEmergencies": "Failed to fetch emergency data",
         "noDataFound": "No data found for this city",
-        "failedToFetchData": "Failed to fetch data"
+        "failedToFetchData": "Failed to fetch data",
+        "noUserWithPassport": "No user found with this passport number",
+        "noUserWithId": "No user found with this ID"
     }
 }

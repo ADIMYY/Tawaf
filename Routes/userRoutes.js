@@ -7,12 +7,14 @@ import {
     deleteUser,
 } from '../Controllers/userController.js';
 
+import { getDataById } from '../Controllers/getDataController.js';
+
 import { protect, restrictTo } from '../Controllers/authController.js';
 
 const router = express.Router();
 router.use(protect);
 
-router.route('/myProfile').get(getUser);
+router.route('/myProfile').get(getDataById);
 router.route('/updateMyProfile').put(updateUser);
 router.route('/').get(restrictTo('admin'), getAllUsers);
 router.route('/deleteMyAccount').delete(deleteUser);

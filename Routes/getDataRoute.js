@@ -9,7 +9,7 @@ import {
 const router = express.Router();
 
 router.get('/Qrcode', getDataFromQrcode);
-router.get('/:passport', getUserByPassport);
-router.get('/:id', getDataById);
+router.get('/passport/:passport', getUserByPassport);
+router.get('/id/:id', getDataById);
 
 export default router;

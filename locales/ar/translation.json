@@ -66,11 +66,10 @@
         "isha": "العشاء"
     },
     "user": {
-        "name": "الاسم",
-        "passPortNumber": "رقم الجواز",
-        "state": "الولاية",
-        "nationality": "الجنسية",
-        "birthDate": "تاريخ الميلاد",
+        "gender": {
+            "male": "ذكر",
+            "female": "أنثى"
+        },
         "maritalStatus": {
             "bachelor": "أعزب",
             "single": "أعزب",
@@ -83,12 +82,7 @@
             "mother": "الأم",
             "brother": "الأخ",
             "sister": "الأخت"
-        },
-        "myDiseases": "الأمراض",
-            "medicinesName": "الأدوية",
-            "companyName": "اسم الشركة",
-            "companyNumber": "رقم الشركة",
-            "alive": "على قيد الحياة"
+        }
     },
     "emergency": {
         "cities": {
@@ -393,6 +387,8 @@
         "noEmergenciesFound": "لم يتم العثور على خدمات طوارئ لهذه المدينة",
         "failedToFetchEmergencies": "فشل في جلب بيانات الطوارئ",
         "noDataFound": "لم يتم العثور على بيانات لهذه المدينة",
-        "failedToFetchData": "فشل في جلب البيانات"
+        "failedToFetchData": "فشل في جلب البيانات",
+        "noUserWithPassport": "لا يوجد مستخدم بهذا الرقم الجواز",
+        "noUserWithId": "لا يوجد مستخدم بهذا المعرف"
     }
 }

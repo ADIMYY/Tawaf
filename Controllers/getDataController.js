@@ -5,33 +5,67 @@ import { getProfileTemplate } from "../templates/profileTemplate.js";
 
 const userFields = 'location photo name nationality state passPortNumber birthDate maritalStatus myDiseases medicinesName relativePhone companyNumber companyName relationship alive userPhone';
 
+
+// utils/userHelpers.js
+
+export const localizeUser = (user, t) => {
+    if (!user) return null;
+
+    const localizedUser = { ...user.toObject() };
+
+    localizedUser.maritalStatus = t(`user.maritalStatus.${localizedUser.maritalStatus}`);
+    localizedUser.relationship = t(`user.relationship.${localizedUser.relationship}`);
+    localizedUser.location = localizedUser.location || 'Not set';
+
+    return localizedUser;
+};
+
+
 // Controller to get user data by passport number
 export const getUserByPassport = asyncHandler(async (req, res, next) => {
+    // Extract language from query parameter (e.g., ?lng=en or ?lng=ar)
+    const lang = req.query.lng || 'en'; // Default to English if no language is provided
+    req.i18n.changeLanguage(lang); // Change language based on query parameter
+    const t = req.t; // i18next translation function
+
     const user = await User.findOne({ passPortNumber: req.params.passport }).select(userFields);
     
     if (!user) {
-        return next(new appError('No user found with this passport number', 404));
+        return next(new appError(t('error.noUserWithPassport'), 404));
     }
-    
-    res.status(200).json({ status: 'success', data: user });
+
+    const localizedUser = localizeUser(user, t);
+
+    res.status(200).json({ status: 'success', data: localizedUser });
 });
 
 // Controller to get user data from QR code
 export const getDataFromQrcode = asyncHandler(async (req, res, next) => {
     const user = await User.findById(req.query.id);
+
     if (!user) {
         return next(new appError('No user found with this QR code', 404));
     }
+    const html = getProfileTemplate(user);
+    console.log(html);
     res.status(200).send(getProfileTemplate(user));
 });
 
 // Controller to get user data by ID
 export const getDataById = asyncHandler(async (req, res, next) => {
-    const user = await User.findById(req.params.id).select(userFields);
+    // Extract language from query parameter (e.g., ?lng=en or ?lng=ar)
+    const lang = req.query.lng || 'en'; // Default to English if no language is provided
+    req.i18n.changeLanguage(lang); // Change language based on query parameter
+    const t = req.t; // i18next translation function
+
+    const id = req.params.id || req.user._id; // Use logged-in user ID if no ID is provided
+    const user = await User.findById(id).select(userFields);
 
     if (!user) {
-        return next(new appError('No user found with this ID', 404));
+        return next(new appError(t('error.noUserWithId'), 404));
     }
 
-    res.status(200).json({ status: 'success', data: user });
+    const localizedUser = localizeUser(user, t);
+
+    res.status(200).json({ status: 'success', data: localizedUser });
 });
