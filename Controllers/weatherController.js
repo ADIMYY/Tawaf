@@ -165,6 +165,31 @@ const weatherClient = {
         'Accept-Encoding': 'gzip, deflate, br',
         'Accept': 'application/json'
     },
+
+    async fetchWeatherData(lat, lon, params) {
+        const retryFetch = async (retries = 3, delay = 1000) => {
+            try {
+                const response = await axios.get(TOMORROW_API_CONFIG.BASE_URL, {
+                    params: {
+                        location: `${lat},${lon}`,
+                        apikey: TOMORROW_API_CONFIG.API_KEY,
+                        units: 'metric',
+                        ...params
+                    },
+                    headers: this.headers
+                });
+                return response.data;
+            } catch (error) {
+                if (retries > 0 && error.response?.status === 429) {
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                    return retryFetch(retries - 1, delay * 2);
+                }
+                throw error;
+            }
+        };
+        return retryFetch();
+    },
+
     async getCurrentWeather(lat, lon, t, lang) {
         const response = await this.fetchWeatherData(lat, lon, {
             timesteps: 'daily',
@@ -199,6 +224,7 @@ const weatherClient = {
             [t('weather.description')]: getCurrentWeatherDescription(currentData, t, lang),
         };
     },
+
     async getWeatherForecast(lat, lon, t, lang) {
         const response = await this.fetchWeatherData(lat, lon, {
             timesteps: '1d',
@@ -232,39 +258,17 @@ const weatherClient = {
                 }
             };
         });
-    },
-    async fetchWeatherData(lat, lon, params) {
-        const retryFetch = async (retries = 3, delay = 1000) => {
-            try {
-                const response = await axios.get(TOMORROW_API_CONFIG.BASE_URL, {
-                    params: {
-                        location: `${lat},${lon}`,
-                        apikey: TOMORROW_API_CONFIG.API_KEY,
-                        units: 'metric',
-                        ...params
-                    },
-                    headers: this.headers
-                });
-                return response.data;
-            } catch (error) {
-                if (retries > 0 && error.response?.status === 429) {
-                    await new Promise(resolve => setTimeout(resolve, delay));
-                    return retryFetch(retries - 1, delay * 2);
-                }
-                throw error;
-            }
-        };
-        return retryFetch();
     }
 };
 
 // Controller to get weather data
 export const getWeather = asyncHandler(async (req, res, next) => {
+    let t = req.t || ((key) => key);
     try {
         // Extract language from query parameter (e.g., ?lng=en or ?lng=ar)
         const lang = req.query.lng || 'en'; // Default to English if no language is provided
         req.i18n.changeLanguage(lang); // Change language based on query parameter
-        const t = req.t; // i18next translation function
+        t = req.t; // i18next translation function
 
         // Extract latitude and longitude from request parameters
         const { lat, lon } = req.params;
