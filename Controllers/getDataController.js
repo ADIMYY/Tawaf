@@ -1,3 +1,4 @@
+import slugify from "slugify";
 import asyncHandler from "express-async-handler";
 import User from '../Model/userModel.js';
 import appError from "../Utils/appError.js";
@@ -55,6 +56,26 @@ export const getDataById = asyncHandler(async (req, res, next) => {
 
     const id = req.params.id || req.user._id; // Use logged-in user ID if no ID is provided
     const user = await User.findById(id).select(userFields);
+
+    if (!user) {
+        return next(new appError(t('error.noUserWithId'), 404));
+    }
+
+    const localizedUser = localizeUser(user, t);
+
+    res.status(200).json({ status: 'success', data: localizedUser });
+});
+
+
+export const getDataByName = asyncHandler(async (req, res, next) => {
+    // Extract language from query parameter (e.g., ?lng=en or ?lng=ar)
+    const lang = req.query.lng || 'en'; // Default to English if no language is provided
+    req.i18n.changeLanguage(lang); // Change language based on query parameter
+    const t = req.t; // i18next translation function
+
+    const { name } = req.body;
+
+    const user = await User.findOne({ slug: slugify(name) }).select(userFields);
 
     if (!user) {
         return next(new appError(t('error.noUserWithId'), 404));
