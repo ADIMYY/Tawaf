@@ -237,12 +237,12 @@ const weatherClient = {
         const weatherCode = minutelyData?.weatherCode ?? dailyData?.weatherCode ?? 1000;
 
         const currentData = {
-            [t('weather.temperature')]: formatters.temperature(minutelyData?.temperature ?? 0, lang),
-            [t('weather.windSpeed')]: formatters.windSpeed(minutelyData?.windSpeed ?? 0, lang),
-            [t('weather.humidity')]: formatters.percentage(minutelyData?.humidity ?? 0, lang),
-            [t('weather.rainChance')]: formatters.percentage(minutelyData?.precipitationProbability ?? 0, lang),
-            [t('weather.sunrise')]: formatters.time(dailyData?.sunriseTime, lat, lon, lang),
-            [t('weather.sunset')]: formatters.time(dailyData?.sunsetTime, lat, lon, lang),
+            temperature: formatters.temperature(minutelyData?.temperature ?? 0, lang),
+            windSpeed: formatters.windSpeed(minutelyData?.windSpeed ?? 0, lang),
+            humidity: formatters.percentage(minutelyData?.humidity ?? 0, lang),
+            rainChance: formatters.percentage(minutelyData?.precipitationProbability ?? 0, lang),
+            sunrise: formatters.time(dailyData?.sunriseTime, lat, lon, lang),
+            sunset: formatters.time(dailyData?.sunsetTime, lat, lon, lang),
             weatherCode: weatherCode,
             icon: getWeatherIcon(weatherCode),
         };
@@ -376,6 +376,7 @@ export const getWeather = asyncHandler(async (req, res, next) => {
             timestamp: Date.now(),
             data: responseData
         };
+        console.log(responseData.current.windSpeed);
 
         res.status(200).json(responseData);
     } catch (error) {
