@@ -14,13 +14,13 @@ const TOMORROW_API_CONFIG = {
 };
 
 const weatherIcons = {
-    snowyWindyClouds: 'https://res.cloudinary.com/dyd5lvwhc/image/upload/v1744023691/1_zwgvxp.png ',
-    partlySunnyWithRain: 'https://res.cloudinary.com/dyd5lvwhc/image/upload/v1744023690/2_gqgpf3.png ',
-    partlySunnyWithThunderstorms: 'https://res.cloudinary.com/dyd5lvwhc/image/upload/v1744023693/3_zzuqh3.png ',
-    cloudyWithSnow: 'https://res.cloudinary.com/dyd5lvwhc/image/upload/v1744023692/4_lu5a3x.png ',
-    sunnyClearSky: 'https://res.cloudinary.com/dyd5lvwhc/image/upload/v1744023693/5_lzbeao.png ',
-    overcastClouds: 'https://res.cloudinary.com/dyd5lvwhc/image/upload/v1744023692/6_pon5zm.png ',
-    partlySunnyWithRain2: 'https://res.cloudinary.com/dyd5lvwhc/image/upload/v1744023693/7_hix73d.png ',
+    snowyWindyClouds: 'https://res.cloudinary.com/dyd5lvwhc/image/upload/v1744023691/1_zwgvxp.png  ',
+    partlySunnyWithRain: 'https://res.cloudinary.com/dyd5lvwhc/image/upload/v1744023690/2_gqgpf3.png  ',
+    partlySunnyWithThunderstorms: 'https://res.cloudinary.com/dyd5lvwhc/image/upload/v1744023693/3_zzuqh3.png  ',
+    cloudyWithSnow: 'https://res.cloudinary.com/dyd5lvwhc/image/upload/v1744023692/4_lu5a3x.png  ',
+    sunnyClearSky: 'https://res.cloudinary.com/dyd5lvwhc/image/upload/v1744023693/5_lzbeao.png  ',
+    overcastClouds: 'https://res.cloudinary.com/dyd5lvwhc/image/upload/v1744023692/6_pon5zm.png  ',
+    partlySunnyWithRain2: 'https://res.cloudinary.com/dyd5lvwhc/image/upload/v1744023693/7_hix73d.png  ',
 };
 
 // Utility functions
@@ -98,7 +98,7 @@ const getWeatherDescription = (weatherCode, t) => {
 const getWeatherIcon = (weatherCode) => {
     const iconMap = {
         1000: weatherIcons.sunnyClearSky,
-        1100: weatherIcons.partlySunnyWithRain,
+        1100: weatherIcons.partlySunnyWithRain2,
         1101: weatherIcons.partlySunnyWithRain,
         1102: weatherIcons.overcastClouds,
         1001: weatherIcons.overcastClouds,
@@ -138,7 +138,6 @@ const getCurrentWeatherDescription = (data, t, lang) => {
     } else {
         tempDescription = t('weather.weatherDescription.cold') ?? 'cold';
     }
-
     let precipDescription = '';
     const rainChance = parseFloat(data[t('weather.rainChance')] ?? 0);
     if (rainChance > 70) {
@@ -150,7 +149,6 @@ const getCurrentWeatherDescription = (data, t, lang) => {
     } else {
         precipDescription = t('weather.weatherDescription.dry conditions') ?? 'dry conditions';
     }
-
     return lang === 'ar'
         ? `${baseDescription} مع درجات حرارة ${tempDescription} و${precipDescription}`
         : `${baseDescription} with ${tempDescription} temperatures and ${precipDescription}`;
@@ -165,7 +163,6 @@ const weatherClient = {
         'Accept-Encoding': 'gzip, deflate, br',
         'Accept': 'application/json'
     },
-
     async fetchWeatherData(lat, lon, params) {
         const retryFetch = async (retries = 3, delay = 1000) => {
             try {
@@ -191,12 +188,12 @@ const weatherClient = {
     },
 
     async getCurrentWeather(lat, lon, t, lang) {
-        const response = await this.fetchWeatherData(lat, lon, {
+        const dailyResponse = await this.fetchWeatherData(lat, lon, {
             timesteps: 'daily',
             fields: ['temperature', 'windSpeed', 'humidity', 'precipitationProbability', 'sunriseTime', 'sunsetTime', 'weatherCode']
         });
 
-        const dailyData = response.timelines.daily[0]?.values;
+        const dailyData = dailyResponse.timelines.daily[0]?.values;
         if (!dailyData) throw new Error(t('error.dailyWeatherDataNotFound') ?? 'Daily weather data not found');
 
         const minutelyResponse = await this.fetchWeatherData(lat, lon, {
@@ -205,6 +202,37 @@ const weatherClient = {
         });
 
         const minutelyData = minutelyResponse.timelines.minutely[0]?.values;
+
+        // Fetch hourly forecast to get current day's temperature variations
+        const hourlyResponse = await this.fetchWeatherData(lat, lon, {
+            timesteps: 'hourly',
+            fields: ['temperature']
+        });
+
+        const currentDayTemperatures = {
+            morning: null,
+            afternoon: null,
+            evening: null,
+            night: null
+        };
+
+        hourlyResponse.timelines.hourly.forEach(hour => {
+            const hourDate = new Date(hour.time);
+            const hourOfDay = hourDate.getHours();
+            const temp = hour.values.temperature;
+
+            const partOfDay = getDayPart(hourOfDay, t); // Use existing helper function
+
+            if (partOfDay === t('weather.timeOfDay.morning')) {
+                currentDayTemperatures.morning = formatters.temperature(temp, lang);
+            } else if (partOfDay === t('weather.timeOfDay.afternoon')) {
+                currentDayTemperatures.afternoon = formatters.temperature(temp, lang);
+            } else if (partOfDay === t('weather.timeOfDay.evening')) {
+                currentDayTemperatures.evening = formatters.temperature(temp, lang);
+            } else if (partOfDay === t('weather.timeOfDay.night')) {
+                currentDayTemperatures.night = formatters.temperature(temp, lang);
+            }
+        });
 
         const weatherCode = minutelyData?.weatherCode ?? dailyData?.weatherCode ?? 1000;
 
@@ -221,7 +249,7 @@ const weatherClient = {
 
         return {
             ...currentData,
-            [t('weather.description')]: getCurrentWeatherDescription(currentData, t, lang),
+            [t('weather.description')]: getCurrentWeatherDescription(currentData, t, lang)
         };
     },
 
@@ -237,25 +265,22 @@ const weatherClient = {
             const date = new Date(day.time);
             const dayKey = date.toLocaleDateString('en-US', { weekday: 'long' });
             const localizedDay = t(`weather.dayName.${dayKey}`) ?? dayKey;
-
             const precipitationProbability = day.values.precipitationProbability ?? 0;
             const rainChance = formatters.percentage(precipitationProbability, lang);
-
             return {
-                [localizedDay]: {
-                    date: date.toLocaleDateString(lang === 'ar' ? 'ar-EG' : 'en-US'),
-                    temperature: {
-                        avg: formatters.temperature(day.values.temperatureAvg ?? 0, lang),
-                        max: formatters.temperature(day.values.temperatureMax ?? 0, lang),
-                        min: formatters.temperature(day.values.temperatureMin ?? 0, lang)
-                    },
-                    weatherCode: day.values.weatherCode ?? day.values.weatherCodeMax ?? 1000,
-                    [t('weather.description')]: getWeatherDescription(day.values.weatherCode ?? 1000, t),
-                    icon: getWeatherIcon(day.values.weatherCode ?? 1000),
-                    [t('weather.sunrise')]: formatters.time(day.values.sunriseTime, lat, lon, lang),
-                    [t('weather.sunset')]: formatters.time(day.values.sunsetTime, lat, lon, lang),
-                    [t('weather.rainChance')]: rainChance
-                }
+                dayName: localizedDay,
+                date: date.toLocaleDateString(lang === 'ar' ? 'ar-EG' : 'en-US'),
+                temperature: {
+                    avg: formatters.temperature(day.values.temperatureAvg ?? 0, lang),
+                    max: formatters.temperature(day.values.temperatureMax ?? 0, lang),
+                    min: formatters.temperature(day.values.temperatureMin ?? 0, lang)
+                },
+                weatherCode: day.values.weatherCode ?? day.values.weatherCodeMax ?? 1000,
+                weatherDescription: getWeatherDescription(day.values.weatherCode ?? 1000, t),
+                icon: getWeatherIcon(day.values.weatherCode ?? 1000),
+                sunrise: formatters.time(day.values.sunriseTime, lat, lon, lang),
+                sunset: formatters.time(day.values.sunsetTime, lat, lon, lang),
+                rainChance
             };
         });
     }
@@ -308,10 +333,41 @@ export const getWeather = asyncHandler(async (req, res, next) => {
 
         const locationData = await reverseGeocode(latitude, longitude, lang);
 
+        const hourlyResponse = await weatherClient.fetchWeatherData(latitude, longitude, {
+            timesteps: 'hourly',
+            fields: ['temperature']
+        });
+
+        const currentDayTemperatures = {
+            morning: null,
+            afternoon: null,
+            evening: null,
+            night: null
+        };
+
+        hourlyResponse.timelines.hourly.forEach(hour => {
+            const hourDate = new Date(hour.time);
+            const hourOfDay = hourDate.getHours();
+            const temp = hour.values.temperature;
+
+            const partOfDay = getDayPart(hourOfDay, t);
+
+            if (partOfDay === t('weather.timeOfDay.morning')) {
+                currentDayTemperatures.morning = formatters.temperature(temp, lang);
+            } else if (partOfDay === t('weather.timeOfDay.afternoon')) {
+                currentDayTemperatures.afternoon = formatters.temperature(temp, lang);
+            } else if (partOfDay === t('weather.timeOfDay.evening')) {
+                currentDayTemperatures.evening = formatters.temperature(temp, lang);
+            } else if (partOfDay === t('weather.timeOfDay.night')) {
+                currentDayTemperatures.night = formatters.temperature(temp, lang);
+            }
+        });
+
         const responseData = {
             location: `${locationData.city}, ${locationData.country}`,
             current,
             dailyTemperatures,
+            currentDayTemperatures,  // Added here only
             direction: lang === 'ar' ? 'rtl' : 'ltr'
         };
 
