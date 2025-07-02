@@ -42,8 +42,7 @@ export const getDataFromQrcode = asyncHandler(async (req, res, next) => {
     if (!user) {
         return next(new appError('No user found with this QR code', 404));
     }
-    const html = getProfileTemplate(user);
-    console.log(html);
+    
     res.status(200).send(getProfileTemplate(user));
 });
 
