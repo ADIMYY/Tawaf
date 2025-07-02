@@ -13,7 +13,6 @@ const localizeUser = (user, t) => {
 
     localizedUser.maritalStatus = t(`user.maritalStatus.${localizedUser.maritalStatus}`);
     localizedUser.relationship = t(`user.relationship.${localizedUser.relationship}`);
-    localizedUser.location = localizedUser.location || 'Not set';
 
     return localizedUser;
 };
