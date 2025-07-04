@@ -84,7 +84,19 @@ const initializeApp = () => {
     app.set('trust proxy', 1);
 
     //! Security middleware
-    app.use(helmet());
+    app.use(
+        helmet({
+            contentSecurityPolicy: {
+            directives: {
+                defaultSrc: ["'self'"],
+                imgSrc: ["'self'", "https:", "https://res.cloudinary.com"],
+                scriptSrc: ["'self'", "'unsafe-inline'", "https:"],
+                styleSrc: ["'self'", "'unsafe-inline'", "https:"],
+                connectSrc: ["'self'", "https:"],
+            },
+            },
+        })
+    );
     app.use(cors());
     app.use(express.json({ limit: '10kb' }));
     app.use(express.urlencoded({ extended: true, limit: '10kb' }));
