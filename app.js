@@ -101,6 +101,9 @@ const initializeApp = () => {
     app.use(express.json({ limit: '10kb' }));
     app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 
+    app.set("views", join(__dirname, "views"));
+    app.set("view engine", "pug");
+
     //! i18next middleware for internationalization
     app.use(i18nextMiddleware.handle(i18next));
 

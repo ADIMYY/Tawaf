@@ -2,7 +2,6 @@ import slugify from "slugify";
 import asyncHandler from "express-async-handler";
 import User from '../Model/userModel.js';
 import appError from "../Utils/appError.js";
-import { getProfileTemplate } from "../templates/profileTemplate.js";
 
 const userFields = 'location photo name nationality state passPortNumber birthDate maritalStatus myDiseases medicinesName relativePhone companyNumber companyName relationship alive userPhone';
 
@@ -44,7 +43,7 @@ export const getDataFromQrcode = asyncHandler(async (req, res, next) => {
         return next(new appError('No user found with this QR code', 404));
     }
     
-    res.status(200).send(getProfileTemplate(user));
+    res.status(200).render("profile", { user });
 });
 
 // Controller to get user data by ID
