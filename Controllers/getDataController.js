@@ -18,7 +18,7 @@ export const getUserByPassport = asyncHandler(async (req, res, next) => {
         return next(new appError(t('error.noUserWithPassport'), 404));
     }
 
-    res.status(200).json({ status: 'success', data: localizedUser });
+    res.status(200).json({ status: 'success', data: user });
 });
 
 // Controller to get user data from QR code
@@ -46,7 +46,7 @@ export const getDataById = asyncHandler(async (req, res, next) => {
         return next(new appError(t('error.noUserWithId'), 404));
     }
 
-    res.status(200).json({ status: 'success', data: localizedUser });
+    res.status(200).json({ status: 'success', data: user });
 });
 
 
@@ -64,5 +64,5 @@ export const getDataByName = asyncHandler(async (req, res, next) => {
         return next(new appError(t('error.noUserWithId'), 404));
     }
 
-    res.status(200).json({ status: 'success', data: localizedUser });
+    res.status(200).json({ status: 'success', data: user });
 });
