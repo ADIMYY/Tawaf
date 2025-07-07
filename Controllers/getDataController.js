@@ -5,18 +5,6 @@ import appError from "../Utils/appError.js";
 
 const userFields = 'location photo name nationality state passPortNumber birthDate maritalStatus myDiseases medicinesName relativePhone companyNumber companyName relationship alive userPhone';
 
-
-const localizeUser = (user, t) => {
-    if (!user) return null;
-
-    const localizedUser = { ...user.toObject() };
-
-    localizedUser.maritalStatus = t(`user.maritalStatus.${localizedUser.maritalStatus}`);
-    localizedUser.relationship = t(`user.relationship.${localizedUser.relationship}`);
-
-    return localizedUser;
-};
-
 // Controller to get user data by passport number
 export const getUserByPassport = asyncHandler(async (req, res, next) => {
     // Extract language from query parameter (e.g., ?lng=en or ?lng=ar)
@@ -29,8 +17,6 @@ export const getUserByPassport = asyncHandler(async (req, res, next) => {
     if (!user) {
         return next(new appError(t('error.noUserWithPassport'), 404));
     }
-
-    const localizedUser = localizeUser(user, t);
 
     res.status(200).json({ status: 'success', data: localizedUser });
 });
@@ -60,8 +46,6 @@ export const getDataById = asyncHandler(async (req, res, next) => {
         return next(new appError(t('error.noUserWithId'), 404));
     }
 
-    const localizedUser = localizeUser(user, t);
-
     res.status(200).json({ status: 'success', data: localizedUser });
 });
 
@@ -79,8 +63,6 @@ export const getDataByName = asyncHandler(async (req, res, next) => {
     if (!user) {
         return next(new appError(t('error.noUserWithId'), 404));
     }
-
-    const localizedUser = localizeUser(user, t);
 
     res.status(200).json({ status: 'success', data: localizedUser });
 });
