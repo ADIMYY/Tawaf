@@ -3,7 +3,7 @@ import asyncHandler from "express-async-handler";
 import User from '../Model/userModel.js';
 import appError from "../Utils/appError.js";
 
-const userFields = 'location photo name nationality state passPortNumber birthDate maritalStatus myDiseases medicinesName relativePhone companyNumber companyName relationship alive userPhone';
+const userFields = 'qrcode location photo name nationality state passPortNumber birthDate maritalStatus myDiseases medicinesName relativePhone companyNumber companyName relationship alive userPhone';
 
 // Controller to get user data by passport number
 export const getUserByPassport = asyncHandler(async (req, res, next) => {
