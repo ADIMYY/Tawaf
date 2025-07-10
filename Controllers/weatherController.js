@@ -282,7 +282,7 @@ const weatherClient = {
                 sunset: formatters.time(day.values.sunsetTime, lat, lon, lang),
                 rainChance
             };
-        });
+        }).slice(0, 5);
     }
 };
 
@@ -376,7 +376,6 @@ export const getWeather = asyncHandler(async (req, res, next) => {
             timestamp: Date.now(),
             data: responseData
         };
-        console.log(responseData.current.windSpeed);
 
         res.status(200).json(responseData);
     } catch (error) {
