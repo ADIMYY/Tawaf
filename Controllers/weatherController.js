@@ -282,7 +282,7 @@ const weatherClient = {
                 sunset: formatters.time(day.values.sunsetTime, lat, lon, lang),
                 rainChance
             };
-        }).slice(0, 5);
+        });
     }
 };
 
