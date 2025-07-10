@@ -12,7 +12,7 @@ export const getUserByPassport = asyncHandler(async (req, res, next) => {
     req.i18n.changeLanguage(lang); // Change language based on query parameter
     const t = req.t; // i18next translation function
 
-    const user = await User.findOne({ passPortNumber: req.params.passport }).select(userFields);
+    const user = await User.findOne({ passPortNumber: req.params.passport });
     
     if (!user) {
         return next(new appError(t('error.noUserWithPassport'), 404));
