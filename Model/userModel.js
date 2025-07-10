@@ -56,7 +56,6 @@ const userSchema = new mongoose.Schema(
         passwordChangeAt: Date,
         gender: {
             type: String,
-            enum: ['male', 'female'],
             required: true,
         },
         userPhone: {
