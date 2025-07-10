@@ -40,7 +40,7 @@ export const getDataById = asyncHandler(async (req, res, next) => {
     const t = req.t; // i18next translation function
 
     const id = req.params.id || req.user._id; // Use logged-in user ID if no ID is provided
-    const user = await User.findById(id).select(userFields);
+    const user = await User.findById(id);
 
     if (!user) {
         return next(new appError(t('error.noUserWithId'), 404));
