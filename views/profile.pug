@@ -192,4 +192,4 @@ head
             p.info-value= user.location === "" || !user.location ? "Not Set" : user.location
         .info-item
             p.info-label &bull; Life Status
-            p.info-value= user.alive
+            p.info-value= user.alive === false ? "Deceased" : "Alive"
