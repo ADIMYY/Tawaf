@@ -57,41 +57,6 @@ Tawaaf App offers a comprehensive suite of features to enhance the pilgrimage ex
 - Emergency services by city
 - Location-based amenities (restaurants, hotels, pharmacies, etc.)
 
-### Weather Information
-
-- Real-time weather via Tomorrow.io API
-- Current conditions, daily/hourly forecasts
-- Temperature, wind, humidity, and icons
-- Smart caching for performance
-
-### User Management
-
-- JWT authentication & secure registration
-- Email verification and password reset
-- QR code digital profiles
-- Photo upload & profile management
-- Health and visa info tracking
-- Emergency contacts & tourism company details
-
-### Security
-
-- Password hashing (bcrypt)
-- JWT with expiration
-- Rate limiting (500 req/5min/IP)
-- Secure file upload & input validation
-- Helmet.js, CORS, trust proxy
-
-### Additional
-
-- Automated email notifications
-- Cloudinary image storage
-- MongoDB (Mongoose ODM)
-- RESTful API
-- Error handling & logging
-- Cron jobs for visa expiration
-- Emergency services by city
-- Location-based amenities (restaurants, hotels, etc.)
-
 ## Project Structure
 
 ```
