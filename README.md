@@ -1,4 +1,5 @@
 # TAWAAF APP
+
 # TAWAAF APP
 
 A modern, all-in-one Islamic platform built with Node.js and Express.js, designed to empower Hajj and Umrah pilgrims with essential digital tools, real-time information, and local support services for a safe and fulfilling journey.
@@ -14,20 +15,22 @@ Tawaaf App offers a comprehensive suite of features to enhance the pilgrimage ex
 - Emergency contacts, nearby hospitals, pharmacies, restaurants, and hotels for quick access to local support
 - Multi-language support (Arabic & English)
 
-
 ## Features
 
 ### Prayer Times
+
 - Accurate prayer times based on user location (Umm Al-Qura method)
 - Automatic timezone detection and 12-hour formatted times
 
 ### Weather Information
+
 - Real-time weather via Tomorrow.io API
 - Current conditions, daily and hourly forecasts
 - Temperature, wind, humidity, and weather icons
 - Smart caching for fast performance
 
 ### User Management
+
 - Secure JWT authentication and registration
 - Email verification and password reset
 - QR code digital profiles for identity and passport info
@@ -36,6 +39,7 @@ Tawaaf App offers a comprehensive suite of features to enhance the pilgrimage ex
 - Emergency contacts and tourism company details
 
 ### Security
+
 - Password hashing (bcrypt)
 - JWT with expiration
 - Rate limiting (500 req/5min/IP)
@@ -43,6 +47,7 @@ Tawaaf App offers a comprehensive suite of features to enhance the pilgrimage ex
 - Helmet.js, CORS, trust proxy
 
 ### Additional Services
+
 - Automated email notifications
 - Cloudinary image storage
 - MongoDB (Mongoose ODM)
