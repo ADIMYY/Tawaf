@@ -1,26 +1,56 @@
 # TAWAAF APP
+# TAWAAF APP
 
-A modern, comprehensive Islamic application built with Node.js and Express.js, designed to support Hajj and Umrah pilgrims with essential digital services.
+A modern, all-in-one Islamic platform built with Node.js and Express.js, designed to empower Hajj and Umrah pilgrims with essential digital tools, real-time information, and local support services for a safe and fulfilling journey.
 
 ## Overview
 
-Tawaaf App provides:
+Tawaaf App offers a comprehensive suite of features to enhance the pilgrimage experience:
 
-- Accurate prayer times based on user location
+- Location-based, precise prayer times (Umm Al-Qura method)
 - Real-time weather updates for Saudi Arabia
-- Digital identity and QR code profiles
-- Health and visa status tracking
-- Emergency contact and local amenities info
+- Digital identity profiles with QR codes for easy verification
+- Health status monitoring and instant visa validity checks
+- Emergency contacts, nearby hospitals, pharmacies, restaurants, and hotels for quick access to local support
 - Multi-language support (Arabic & English)
+
 
 ## Features
 
 ### Prayer Times
+- Accurate prayer times based on user location (Umm Al-Qura method)
+- Automatic timezone detection and 12-hour formatted times
 
-- Location-based, precise prayer calculations (Umm Al-Qura method)
-- Automatic timezone detection
-- 12-hour formatted times
-- Qibla direction
+### Weather Information
+- Real-time weather via Tomorrow.io API
+- Current conditions, daily and hourly forecasts
+- Temperature, wind, humidity, and weather icons
+- Smart caching for fast performance
+
+### User Management
+- Secure JWT authentication and registration
+- Email verification and password reset
+- QR code digital profiles for identity and passport info
+- Photo upload and profile management
+- Health and visa info tracking
+- Emergency contacts and tourism company details
+
+### Security
+- Password hashing (bcrypt)
+- JWT with expiration
+- Rate limiting (500 req/5min/IP)
+- Secure file upload and input validation
+- Helmet.js, CORS, trust proxy
+
+### Additional Services
+- Automated email notifications
+- Cloudinary image storage
+- MongoDB (Mongoose ODM)
+- RESTful API
+- Error handling and logging
+- Cron jobs for visa expiration
+- Emergency services by city
+- Location-based amenities (restaurants, hotels, pharmacies, etc.)
 
 ### Weather Information
 
