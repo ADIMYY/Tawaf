@@ -1,7 +1,5 @@
 # TAWAAF APP
 
-# TAWAAF APP
-
 A modern, all-in-one Islamic platform built with Node.js and Express.js, designed to empower Hajj and Umrah pilgrims with essential digital tools, real-time information, and local support services for a safe and fulfilling journey.
 
 ## Overview
