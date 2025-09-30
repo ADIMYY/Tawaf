@@ -104,20 +104,6 @@ Tawaaf App offers a comprehensive suite of features to enhance the pilgrimage ex
 - Emergency services by city
 - Location-based amenities (restaurants, hotels, pharmacies, etc.)
 
-## Project Structure
-
-```
-├── Controllers/     # Business logic
-├── Model/           # Mongoose schemas
-├── Routes/          # API endpoints
-├── Middleware/      # Custom middleware
-├── Utils/           # Helpers & validators
-├── Templates/       # Email/profile templates
-├── app.js           # App entry point
-├── vercel.json      # Deployment config
-└── package.json     # Dependencies
-```
-
 ## Tech Stack
 
 - **Backend:** Node.js, Express.js
