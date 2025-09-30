@@ -1,6 +1,55 @@
 # TAWAAF APP
 
-A modern, all-in-one Islamic platform built with Node.js and Express.js, designed to empower Hajj and Umrah pilgrims with essential digital tools, real-time information, and local support services for a safe and fulfilling journey.
+A modern, all-in-one Islamic platform bui## Project Structure
+
+```
+├── Controllers/           # Business logic handlers
+│   ├── authController      # Authentication & authorization logic
+│   ├── prayTimeController  # Prayer times calculations
+│   ├── weatherController   # Weather data handling
+│   ├── userController     # User management
+│   ├── emergencyController # Emergency services
+│   └── cronJobController   # Scheduled tasks
+│
+├── Model/                # Database schemas & models
+│   ├── userModel         # User profile schema
+│   ├── emergencyModel    # Emergency contacts schema
+│   └── aroundYouModel    # Local amenities schema
+│
+├── Routes/               # API route definitions
+│   ├── authRoute         # Authentication routes
+│   ├── prayTimesRoute    # Prayer times endpoints
+│   ├── weatherRoute      # Weather data endpoints
+│   ├── emergencyRoute    # Emergency services routes
+│   └── userRoutes        # User management endpoints
+│
+├── Middleware/           # Custom middleware functions
+│   ├── errorMiddleware   # Error handling
+│   ├── uploadMiddleware  # File upload handling
+│   └── validatorMiddleware # Input validation
+│
+├── Utils/               # Helper functions & utilities
+│   ├── appError         # Error handling utilities
+│   ├── generateToken    # JWT token management
+│   ├── geocode         # Location services
+│   ├── sendEmail       # Email notification system
+│   └── validator/      # Input validation rules
+│
+├── locales/            # Internationalization files
+│   ├── ar/             # Arabic translations
+│   └── en/             # English translations
+│
+├── views/              # Template files
+│   └── profile.pug     # Profile page template
+│
+├── app.js             # Application entry point
+├── config.env         # Environment configuration
+├── i18n.js           # Internationalization setup
+├── vercel.json       # Vercel deployment config
+└── package.json      # Project dependencies
+```
+
+## Tech Stack and Express.js, designed to empower Hajj and Umrah pilgrims with essential digital tools, real-time information, and local support services for a safe and fulfilling journey.
 
 ## Overview
 
