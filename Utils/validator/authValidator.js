@@ -45,8 +45,6 @@ export const signupValidator = [
     validatorMiddleware
 ];
 
-
-
 export const loginValidator = [
     check('email')
         .notEmpty()
@@ -58,5 +56,30 @@ export const loginValidator = [
         .withMessage('Password is required')
         .isLength({ min: 8 })
         .withMessage('password must be at least 8 characters'),
+    validatorMiddleware
+];
+
+export const forgotPasswordValidator = [
+    body('email')
+        .isEmail()
+        .withMessage('Please enter a valid email'),
+    validatorMiddleware
+];
+
+export const verifyResetCodeValidator = [
+    body('code')
+        .notEmpty()
+        .isLength({ min: 6, max: 6})
+        .withMessage('Reset code must be 6 characters'),
+    validatorMiddleware
+];
+
+export const resetPasswordValidator = [
+    body('email')
+        .isEmail()
+        .withMessage('Invalid email'),
+    body('password')
+        .isLength({ min: 8 })
+        .withMessage('Password must be at least 8 characters'),
     validatorMiddleware
 ];

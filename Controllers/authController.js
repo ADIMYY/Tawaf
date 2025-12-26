@@ -1,5 +1,4 @@
 import crypto from 'crypto';
-
 import sharp from 'sharp';
 import { v4 as uuidv4 } from 'uuid';
 import asyncHandler from 'express-async-handler';
@@ -9,227 +8,230 @@ import { v2 as cloudinary } from 'cloudinary';
 import QRCode from 'qrcode';
 
 import User from '../Model/userModel.js';
-import appError from '../Utils/appError.js';
+import AppError from '../Utils/appError.js';
 import sendEmail from '../Utils/sendEmail.js';
 import { uploadMixImage } from '../Middleware/uploadImageMiddleware.js';
 import generateToken from '../Utils/generateToken.js';
 
+
+// Constants
+const IMAGE_FOLDERS = {
+    photo: 'profiles', 
+    visa: 'visas', 
+    qr: 'qr_codes'
+}
+
+const IMAGE_CONFIGS = {
+    photo: { width: 600, height: 600, quality: 90 }, 
+    visa: { width: 800, height: null, quality: 80 }, 
+}
+
+// Upload Middleware
 export const uploadImages = uploadMixImage([
     { name: 'photo', maxCount: 1, },
     { name: 'visa', maxCount: 1 }
 ]);
 
+
+// Image Processing & Upload
 export const resizeImage = asyncHandler(async (req, res, next) => {
-    if (!req.file && !req.files) {
-        console.log('No files to resize');
-        return next();
-    }
+    if (!req.file && !req.files) return next();
 
     try {
+        const fileMap = {};
         if (req.file) {
-            await processAndUploadImage(req.file, 'photo', req);
-        } else if (req.files) {
-            for (const [fileName, files] of Object.entries(req.files)) {
-                await processAndUploadImage(files[0], fileName, req);
-            }
+            fileMap[req.file.fieldname] = req.file;
+        } else {
+            Object.assign(fileMap, req.files);
         }
+
+        // Process each uploaded file
+        const uploadPromises = Object.entries(fileMap).map(([fileName, files]) => 
+            processAndUploadImage(files[0], fileName, req)
+        );
+
+        await Promise.all(uploadPromises);
+
         next();
     } catch (error) {
-        console.error('Error in resizing image:', error.message);
-        return next(new appError('Error in resizing image', 500));
+        console.error('Error resizing/uploading image:', error);
+        return next(new AppError('Failed to process uploaded images', 500));
     }
 });
 
-
+// process and uploads an image buffer to Cloudinary
 async function processAndUploadImage(file, fieldName, req) {
-    const id = uuidv4();
+    const config = IMAGE_CONFIGS[fieldName] || IMAGE_CONFIGS.photo;
+    const folder = IMAGE_FOLDERS[fieldName];
 
-    const resizeConfig = {
-        photo : {  width: 600, height: 600, quality: 90, folder: 'profiles' },
-        visa: { width: 800, height: null, quality: 80, folder: 'visas' }
-    };
-
-    const config = resizeConfig[fieldName] || resizeConfig.photo;
-
-    let sharpInstance = sharp(file.buffer).toFormat('jpeg').jpeg({ quality: config.quality });
+    let sharpInstance = sharp(file.buffer)
+        .toFormat('jpeg')
+        .jpeg({ quality: config.quality });
 
     if (config.width || config.height) {
         sharpInstance = sharpInstance.resize(config.width, config.height, {
-            fit: 'inside',
+            fit: 'inside', 
             withoutEnlargement: true,
         });
     }
 
     const resizedBuffer = await sharpInstance.toBuffer();
 
-    const uploadResult = await new Promise((resolve, reject) => {
+    const result = await uploadToCloudinary(resizedBuffer, folder, `${fieldName}-${uuidv4()}`);
+    
+    // Store URL in a new field to avoid mutating req.body prematurely
+    if (!req.uploadedFiles) req.uploadedFiles = {};
+    req.uploadedFiles[fieldName] = result.secure_url;
+}
+
+// Generic Cloudinary Upload Utility
+function uploadToCloudinary(buffer, folder, publicId) {
+    return new Promise((resolve, reject) => {
         const stream = cloudinary.uploader.upload_stream(
-            {
-                folder: config.folder,
-                public_id: `${fieldName}-${id}`,
-            },
+            { folder, public_id: publicId },
             (error, result) => {
                 if (error) reject(error);
                 else resolve(result);
             }
         );
-        stream.end(resizedBuffer);
+        stream.end(buffer);
     });
-
-    if (!req.body) req.body = {}; // Ensure req.body exists
-    req.body[fieldName] = uploadResult.secure_url;
 }
 
+// QRcode Generation
+async function generateQrCode(user) {
+    const url = `${process.env.MAIN_URL}/api/v1/get-data/Qrcode?id=${user._id}`;
+    const qrBuffer = await QRCode.toBuffer(url);
 
-async function generateQrcode(user) {
-    try {
-        const fileName = `${user._id}`;
-        const url = `https://tawaf-sooty.vercel.app/api/v1/get-data/Qrcode?id=${user._id}`;
-
-        // Generate QR code as a buffer
-        const qrBuffer = await QRCode.toBuffer(url);
-
-        // Upload directly to Cloudinary
-        const result = await new Promise((resolve, reject) => {
-            const stream = cloudinary.uploader.upload_stream(
-                {
-                    folder: 'qr_codes',
-                    public_id: fileName,
-                },
-                (error, result) => {
-                    if (error) reject(error);
-                    else resolve(result);
-                }
-            );
-            stream.end(qrBuffer);
-        });
-
-        return result.secure_url;
-    } catch (error) {
-        console.error('Error generating QR code:', error);
-        throw error;
-    }
+    const result = await uploadToCloudinary(qrBuffer, IMAGE_FOLDERS.qr, `${user._id}`);
+    return result.secure_url;
 }
 
-
+// Auth Controller
 export const signup = asyncHandler(async (req, res, next) => {
-    try {
-        const user = await User.create(req.body);
-        const token = generateToken(user._id);
-        const qrcodeUrl = await generateQrcode(user);
+    const userData = { ...req.body, ...req.uploadedFiles };
 
-        user.qrcode = qrcodeUrl;
-        await user.save();
+    const user = await User.create(userData);
+    const token = generateToken(user._id);
+    const qrcodeUrl = await generateQrCode(user);
 
-        res.status(201).json({
-            status: 'success',
-            id: user._id,
-            token,
-        });
-    } catch (error) {
-        console.error('Error in signup process:', error.message);
-        return next(new appError(`Error in signup process: ${error.message}`, 500));
-    }
+    user.qrcode = qrcodeUrl;
+    await user.save({ validateBeforeSave: false }); // avoid rehashing password
+
+    res.status(201).json({
+        status: 'success',
+        message: 'User registered successfully',
+        token,
+        id: user._id,
+    });
 });
 
-
+// User Login
 export const login = asyncHandler(async (req, res, next) => {
     const { email, password } = req.body;
-    const user = await User.findOne({ email }).select('+password _id approved name');
+    const user = await User.findOne({ email }).select('+password');
 
     if (!user || !(await bcrypt.compare(password, user.password))) {
-        return next(new appError('Incorrect email or password', 401));
+        return next(new AppError('Incorrect email or password', 401));
+    }
+
+    if (!user.approved) {
+        return next(new AppError('Your account is not approved yet. Please wait for approval.', 403)); // 403 for 
     }
 
     const token = generateToken(user._id);
 
-    res.status(200).json({ status: 'success', data: user, token });
+    res.status(200).json({
+        status: 'success',
+        message: 'Logged in successfully',
+        token,
+        data: {
+            id: user._id,
+            name: user.name,
+            email: user.email,
+            role: user.role,
+            approved: user.approved,
+            photo: user.photo,
+            visa: user.visa,
+            qrcode: user.qrcode
+        }
+    });
 });
 
-
+// Protect Middleware - authenticate user via JWT
 export const protect = asyncHandler(async (req, res, next) => {
-    //* 1] check if token exists
+    // 1. check for token
     let token;
-    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+    if (req.headers.authorization?.startsWith('Bearer')) {
         token = req.headers.authorization.split(' ')[1];
     }
     
     if (!token) {
-        return next(new appError('Please login to be able to access this route', 401));
+        return next(new AppError('Please login to access this resource', 401));
     }
 
-    //* 2] verify token is valid (no change happens, expired)
+    // 2. verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
     
-    //* 3] check if user exists
-    const curUser = await User.findById(decoded.userId);
-
+    // 3. validate user exists
+    const currentUser = await User.findById(decoded.userId);
     if (!curUser) {
-        return next(new appError('The user belonging to this token does no longer exist.', 401))
+        return next(new AppError('The user belonging to this token no longer exists.', 401))
     }
 
-    //* 4] check if user change his password after token creation
-    if (curUser.passwordChangeAt) {
-        const timeStamp = parseInt(
-            curUser.passwordChangeAt.getTime() / 1000,
-            10
-        );
+    // 4. Check if password was changed after token issued
+    if (currentUser.passwordChangeAt) {
+        const timeStamp = parseInt(currentUser.passwordChangeAt.getTime() / 1000, 10);
         
         if (timeStamp > decoded.iat) { //* Password changed
-            return next(
-                new appError(
-                    'User recently changed his password. Please login again...', 
-                    401
-                )
-            );
+            return next(new AppError('User recently changed his password. Please login again...', 401));
         }
     }
 
-    req.user = curUser;
+    req.user = currentUser;
     next();
 });
 
-
-export const restrictTo = (...roles) => 
-    asyncHandler(async (req, res, next) => {
+// Restrict access based on roles
+export const restrictTo = (...roles) => {
+    return (req, res, next) => {
         if (!roles.includes(req.user.role)) {
-            return next(new appError('You do not have permission to perform this action', 403));
+            return next(new AppRrror('You do not have permission to perform this action', 403));
         }
-        
         next();
-});
+    };
+};
 
-
-export const forgotPassword = asyncHandler(async (req, res, next) => {  
-    //! 1] Get user by email
-    const user = await User.findOne({ email: req.body.email });
+// Forgot Password - send reset code
+export const forgotPassword = asyncHandler(async (req, res, next) => {
+    const { email } = req.body;
+    const user = await User.findOne({ email });
 
     if (!user) {
-        return next(new appError(`There no user with this email: ${req.body.email}`, 404));
+        return next(new AppError(`There no user with this email: ${email}`, 404));
     }
 
-    //! 2] Generate hash code (6 digits) and save in database
+    // Generate 6-digit reset code
     const code = Math.floor(100000 + Math.random() * 900000).toString();
     const hashedCode = crypto.createHash('sha256').update(code).digest('hex');
 
-    //* Saved into database
+    // save hashed code and expiry
     user.hashedCode = hashedCode;
-    user.hashedCodeExpires = Date.now() + 10 * 60 * 1000;
+    user.hashedCodeExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
     user.hashedCodeVerified = false;
 
-    await user.save();
+    await user.save({ validateBeforeSave: false });
 
-    //! Send the code via email
+    // Send email
     const options = {
         email: user.email,
         subject: 'Password Reset Request',
-        text: `You requested a password reset.`,
         message: `
             <p>You requested a password reset.</p>
-            <p>this is your code:</p>
+            <p>Your verification code is:</p>
             <h1>${code}</h1>
-            <p>If you didn't request a password reset, please ignore this email.</p>
-            <p>Thanks!</p>
+            <p>This code is valid for 10 minutes.</p>
+            <p>If you didn't request this, please ignore this email.</p>
         `
     }
     try {
@@ -238,19 +240,21 @@ export const forgotPassword = asyncHandler(async (req, res, next) => {
         user.hashedCode = undefined;
         user.hashedCodeExpires = undefined;
         user.hashedCodeVerified = undefined;
+        await user.save({ validateBeforeSave: false });
 
-        await user.save();
-        console.log(err.message);
-        return next(new appError('There is an error in sending email', 500));
+        return next(new AppError('Failed to send reset email, Please try again later', 500));
     }
 
-    res.status(200).json({ status: 'success', message: 'reset code sent to e-mail' });
+    res.status(200).json({
+        status: 'success', 
+        message: 'reset code sent to e-mail' 
+    });
 });
 
-
+// verify reset code
 export const verifyResetCodePassword = asyncHandler(async (req, res, next) => {
-    //! 1] Get user based on reset code
-    const hashedCode = crypto.createHash('sha256').update(req.body.code).digest('hex');
+    const { code } = req.body;
+    const hashedCode = crypto.createHash('sha256').update(code).digest('hex');
 
     const user = await User.findOne({ 
         hashedCode,
@@ -258,29 +262,32 @@ export const verifyResetCodePassword = asyncHandler(async (req, res, next) => {
     });
 
     if (!user) {
-        return next(new appError('Reset Code invalid or expired', 500));
+        return next(new AppError('Invalid or expired reset code', 500));
     }
 
-    //! 2] Reset code valid
     user.hashedCodeVerified = true;
-    await user.save();
+    await user.save({ validateBeforeSave: false });
 
-    res.status(200).json({ status: 'OK' });
+    res.status(200).json({
+        status: 'Success',
+        message: 'Reset code verified successfully.',
+    });
 });
 
-
+// Reset Password after code verification
 export const resetPassword = asyncHandler(async (req, res, next) => {
     const {email, password} = req.body;
-    const user = await User.findOne({ email });
 
+    const user = await User.findOne({ email });
     if (!user) {
-        return next(new appError('There is no user with email', 404));
+        return next(new AppError('There is no user with email', 404));
     }
 
     if (!user.hashedCodeVerified) {
-        return next(new appError('Reset code not verified', 400));
+        return next(new AppError('Reset code not verified', 400));
     }
 
+    // 🔐 Hash the new password
     user.password = password;
     user.hashedCode = undefined;
     user.hashedCodeExpires = undefined;
@@ -288,11 +295,10 @@ export const resetPassword = asyncHandler(async (req, res, next) => {
     
     await user.save();
 
-    //! if Ok generate token
     const token = generateToken(user._id);
 
     res.status(200).json({
-        status: 'OK',
+        status: 'Success',
         message: 'Your password has been updated successfully',
         token,
     });

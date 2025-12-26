@@ -1,12 +1,17 @@
-import { validationResult } from "express-validator";
+import { validationResult } from 'express-validator';
+import AppError from '../Utils/appError.js';
 
 const validatorMiddleware = (req, res, next) => {
     const errors = validationResult(req);
+
     if (!errors.isEmpty()) {
-        return res.status(400).json({
-            errors: errors.array()
-        });
+        const errorMessages = errors.array().map(err => err.msg);
+
+        const message = `Validation failed: ${errorMessages.join('; ')}`;
+
+        return next(new AppError(message, 400));
     }
+
     next();
 };
 

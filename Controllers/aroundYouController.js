@@ -1,6 +1,6 @@
 import asyncHandler from "express-async-handler";
 import AroundYou from "../Model/aroundYouModel.js";
-import appError from "../Utils/appError.js";
+import AppError from "../Utils/appError.js";
 
 // Format phone numbers for arabic script
 const formatPhoneNumber = (phone, lang) => {
@@ -71,7 +71,7 @@ export const getAroundYou = asyncHandler(async (req, res, next) => {
 
         const rawData = await AroundYou.find(query);
         if (!rawData.length) {
-            return next(new appError(t('error.noDataFound', 'No data found for the specified city'), 404));
+            return next(new AppError(t('error.noDataFound', 'No data found for the specified city'), 404));
         }
 
         const translatedData = translateAroundYouData(rawData, t, lang);
@@ -83,7 +83,7 @@ export const getAroundYou = asyncHandler(async (req, res, next) => {
         });
     } catch (error) {
         console.error('AroundYou API Error:', error.message, error.stack);
-        return next(new appError(
+        return next(new AppError(
             t('error.failedToFetchData', 'Failed to fetch nearby data'),
             500
         ));

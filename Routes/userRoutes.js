@@ -7,21 +7,39 @@ import {
     deleteUser,
 } from '../Controllers/userController.js';
 
-import { getDataById } from '../Controllers/getDataController.js';
+import { validateUserId } from '../Utils/validator/userValidator.js';
 
 import { protect, restrictTo } from '../Controllers/authController.js';
 
 const router = express.Router();
 router.use(protect);
 
-router.route('/myProfile').get(getDataById);
-router.route('/updateMyProfile').put(updateUser);
+router.route('/myProfile').get(getUser);
+
+router.route('/updateMyProfile')
+    .put(
+        validateUserId, 
+        updateUser
+    );
+
 router.route('/').get(restrictTo('admin'), getAllUsers);
-router.route('/deleteMyAccount').delete(deleteUser);
+
+router.route('/deleteMyAccount')
+    .delete(
+        validateUserId, 
+        deleteUser
+    );
 
 router
     .route('/:id')
     .get(restrictTo('admin'), getUser)
-    .put(updateUser).delete(deleteUser);
+    .put(
+        validateUserId, 
+        updateUser
+    )
+    .delete(
+        validateUserId, 
+        deleteUser
+    );
 
 export default router;

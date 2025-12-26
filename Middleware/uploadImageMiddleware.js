@@ -1,21 +1,38 @@
-import multer from "multer";
+import multer from 'multer';
+import AppError from '../Utils/appError.js';
 
-import appError from "../Utils/appError.js";
+const multerStorage = multer.memoryStorage();
 
-const multerOptions = () => {
-    //* Memory Storage engine
-    const multerStorage = multer.memoryStorage();
+const multerFilter = (req, file, cb) => {
+    if (file.mimetype.startsWith('image')) {
+        cb(null, true);
+    } else {
+        // Pass a standard Error (multer doesn't understand AppError)
+        cb(new Error('Only image files are allowed!'), false);
+    }
+};
 
-    const multerFilter = function (req, file, cb) {
-        if (file.mimetype.startsWith('image')) {
-            cb(null, true);
-        } else {
-            cb(new appError('only image files allowed', 400), false);
+const upload = multer({
+    storage: multerStorage,
+    fileFilter: multerFilter,
+    limits: {
+        fileSize: 5 * 1024 * 1024 // 5 MB max per file
+    }
+});
+
+export const uploadMixImage = (fields) => {
+    return upload.fields(fields);
+};
+
+export const handleMulterError = (err, req, res, next) => {
+    if (err instanceof multer.MulterError) {
+        if (err.code === 'LIMIT_FILE_SIZE') {
+            return next(new AppError('File too large. Max size is 5MB.', 400));
         }
-    };
-
-    const upload = multer({ storage: multerStorage, fileFilter: multerFilter });
-    return upload;
-}
-
-export const uploadMixImage = (arrayFields) => multerOptions().fields(arrayFields);
+        return next(new AppError('File upload error.', 400));
+    }
+    if (err.message === 'Only image files are allowed!') {
+        return next(new AppError(err.message, 400));
+    }
+    next(err);
+};

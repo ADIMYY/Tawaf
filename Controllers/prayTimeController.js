@@ -1,71 +1,105 @@
-import asyncHandler from "express-async-handler";
+import asyncHandler from 'express-async-handler';
 import { PrayerTimes, CalculationMethod, Coordinates } from 'adhan';
-import appError from "../Utils/appError.js";
-import tzlookup from 'tz-lookup'; // To dynamically get the timezone based on coordinates
-import { reverseGeocode } from "../Utils/geocode.js";
+import AppError from '../Utils/appError.js';
+import tzlookup from 'tz-lookup';
+import { reverseGeocode } from '../Utils/geocode.js';
 
-// Helper function to format prayer times
-const formatTime = (time, timeZone, lang) => {
-    if (!time) return null;
+// Format time based on locale and timezone
+const formatTime = (date, timeZone, lang) => {
+    if (!date || !timeZone) return null;
 
-    return time.toLocaleTimeString(lang === 'ar' ? 'ar-EG' : 'en-US', {
-        timeZone,
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: true
-    });
+    try {
+        return new Intl.DateTimeFormat(lang === 'ar' ? 'ar-EG' : 'en-US', {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true,
+            timeZone
+        }).format(date);
+    } catch (error) {
+        console.warn('Time formatting failed:', error.message);
+        return null;
+    }
 };
 
-// Controller to get prayer times for any place based on latitude and longitude
+//Get prayer times for given coordinates
 export const getPrayTimes = asyncHandler(async (req, res, next) => {
-    try {
-        // Extract language from query parameter (e.g., ?lng=en or ?lng=ar)
-        const lang = req.query.lng || 'en'; // Default to English if no language is provided
-        req.i18n.changeLanguage(lang); // Change language based on query parameter
-        const t = req.t; // i18next translation function
+    // Extract query params
+    const { lng: lang = 'en' } = req.query;
 
-        // Extract latitude and longitude from request parameters
-        const latitude = parseFloat(req.params.lat);
-        const longitude = parseFloat(req.params.lon);
+    // Safely use translation function
+    const t = req.t || ((key, defaultValue) => {
+        const k = Array.isArray(key) ? key[0] : key;
+        return defaultValue || k.split('.').pop();
+    });
 
-        // Validate coordinates
-        if (isNaN(latitude) || isNaN(longitude)) {
-            return next(new appError(t('error.invalidCoordinates'), 400));
-        }
+    // Parse and validate coordinates
+    const lat = parseFloat(req.params.lat);
+    const lon = parseFloat(req.params.lon);
 
-        // Create coordinates object
-        const coordinates = new Coordinates(latitude, longitude);
-
-        // Determine the timezone for the given coordinates
-        const timeZone = tzlookup(latitude, longitude);
-
-        // Define calculation method for prayer times (Umm Al-Qura method)
-        const params = CalculationMethod.UmmAlQura();
-
-        // Calculate prayer times for today
-        const today = new Date();
-        const prayerTimes = new PrayerTimes(coordinates, today, params);
-
-        // Format prayer times for response with the correct timezone
-        const formattedPrayerTimes = {
-            [t('prayTimes.fajr')]: formatTime(prayerTimes.fajr, timeZone, lang),
-            [t('prayTimes.dhuhr')]: formatTime(prayerTimes.dhuhr, timeZone, lang),
-            [t('prayTimes.asr')]: formatTime(prayerTimes.asr, timeZone, lang),
-            [t('prayTimes.maghrib')]: formatTime(prayerTimes.maghrib, timeZone, lang),
-            [t('prayTimes.isha')]: formatTime(prayerTimes.isha, timeZone, lang),
-        };
-
-        const locationData = await reverseGeocode(latitude, longitude, lang);
-
-        // Send response
-        res.status(200).json({
-            status: 'success',
-            data: {
-                location: `${locationData.city}, ${locationData.country}`,
-                prayerTimes: formattedPrayerTimes,
-            },
-        });
-    } catch (error) {
-        return next(new appError(t('error.failedToCalculatePrayerTimes'), 500));
+    if (isNaN(lat) || isNaN(lon)) {
+        return next(new AppError(t('error.invalidCoordinates', 'Invalid latitude or longitude.'), 400));
     }
+
+    if (lat < -90 || lat > 90) {
+        return next(new AppError(t('error.invalidLatitude', 'Latitude must be between -90 and 90.'), 400));
+    }
+
+    if (lon < -180 || lon > 180) {
+        return next(new AppError(t('error.invalidLongitude', 'Longitude must be between -180 and 180.'), 400));
+    }
+
+    let timeZone;
+    try {
+        timeZone = tzlookup(lat, lon);
+    } catch (err) {
+        return next(new AppError(t('error.timezoneNotFound', 'Could not determine timezone for these coordinates.'), 500));
+    }
+
+    // Set up calculation parameters (Umm Al-Qura method)
+    const coordinates = new Coordinates(lat, lon);
+    const params = CalculationMethod.UmmAlQura();
+    const date = new Date(); // Today
+
+    // Calculate prayer times
+    const times = new PrayerTimes(coordinates, date, params);
+
+    // Format response
+    const formattedPrayerTimes = {
+        [t('prayTimes.fajr')]: formatTime(times.fajr, timeZone, lang),
+        [t('prayTimes.sunrise')]: formatTime(times.sunrise, timeZone, lang),
+        [t('prayTimes.dhuhr')]: formatTime(times.dhuhr, timeZone, lang),
+        [t('prayTimes.asr')]: formatTime(times.asr, timeZone, lang),
+        [t('prayTimes.maghrib')]: formatTime(times.maghrib, timeZone, lang),
+        [t('prayTimes.isha')]: formatTime(times.isha, timeZone, lang),
+        [t('prayTimes.midnight')]: formatTime(times.midnight, timeZone, lang)
+    };
+
+    // Reverse geocode for human-readable location
+    let locationLabel = `${lat.toFixed(4)}, ${lon.toFixed(4)}`; // Fallback
+    try {
+        const geoData = await reverseGeocode(lat, lon, lang);
+        if (geoData && (geoData.city || geoData.region || geoData.country)) {
+            locationLabel = [
+                geoData.city,
+                geoData.region,
+                geoData.country
+            ].filter(Boolean).join(', ');
+        }
+    } catch (error) {
+        console.warn(`Reverse geocoding failed for [${lat}, ${lon}]:`, error.message);
+    }
+
+    // Success response
+    res.status(200).json({
+        status: 'success',
+        data: {
+            location: locationLabel,
+            coordinates: { lat, lon },
+            timeZone,
+            calculationMethod: 'Umm Al-Qura',
+            date: date.toISOString().split('T')[0],
+            prayerTimes: formattedPrayerTimes
+        },
+        direction: lang === 'ar' ? 'rtl' : 'ltr'
+    });
 });

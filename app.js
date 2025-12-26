@@ -36,6 +36,7 @@ import emergencyRoute from './Routes/emergencyRoute.js';
 import aroundYouRoute from './Routes/aroundYouRoute.js';
 
 //! Middleware
+import { handleMulterError } from './Middleware/uploadImageMiddleware.js';
 import globalError from './Middleware/errorMiddleware.js';
 
 //! Initialize environment variables
@@ -131,6 +132,7 @@ const initializeApp = () => {
     app.use('/api/v1/cronJob', cronJobRoute);
 
     //! Error handling middleware (should be last)
+    app.use(handleMulterError);
     app.use(globalError);
 
     return { app, port };

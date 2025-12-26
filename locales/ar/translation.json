@@ -16,6 +16,12 @@
             "Thursday": "الخميس",
             "Friday": "الجمعة"
         },
+        "timeOfDay": {
+            "morning": "الصباح",
+            "afternoon": "الظهيرة",
+            "evening": "المساء",
+            "night": "الليل"
+        },
         "weatherDescription": {
             "Clear, sunny": "صافي ومشمس",
             "Mostly clear": "غالبًا صافي",
@@ -40,21 +46,19 @@
             "Heavy ice pellets": "حبات جليد كثيفة",
             "Light ice pellets": "حبات جليد خفيفة",
             "Thunderstorm": "عاصفة رعدية",
-            "Unknown": "غير معروف",
+            "Unknown": "غير معروف"
+        },
+        "temp": {
             "hot": "حار",
             "warm": "دافئ",
             "cool": "بارد",
-            "cold": "شديد البرودة",
+            "cold": "شديد البرودة"
+        },
+        "precip": {
             "high chance of precipitation": "فرصة عالية لهطول الأمطار",
             "moderate chance of precipitation": "فرصة متوسطة لهطول الأمطار",
             "slight chance of precipitation": "فرصة طفيفة لهطول الأمطار",
             "dry conditions": "ظروف جافة"
-        },
-        "timeOfDay": {
-            "morning": "الصباح",
-            "afternoon": "الظهيرة",
-            "evening": "المساء",
-            "night": "الليل"
         }
     },
     "prayTimes": {
@@ -90,62 +94,62 @@
             "medina": "المدينة المنورة"
         },
         "hospitals": {
-            "681cc8a37be1d1683e01e685": {
+            "king_abdullah_medical_city": {
                 "name": "مدينة الملك عبدالله الطبية",
                 "location": "شارع المشاعر، مكة 24246"
             },
-            "681cc8a37be1d1683e01e686": {
+            "al_noor_specialized_hospital": {
                 "name": "مستشفى النور التخصصي",
                 "location": "الدائري الثالث، مكة 24241"
             },
-            "681cc8a37be1d1683e01e687": {
+            "king_faisal_specialized_hospital": {
                 "name": "مستشفى الملك فيصل التخصصي",
                 "location": "طريق الحرم الكبير، حي الشاشة"
             },
-            "681cc8a37be1d1683e01e688": {
+            "haraa_general_hospital": {
                 "name": "مستشفى حراء العام",
                 "location": "طريق المدينة، حي العزيزية"
             },
-            "681cc9136043a362d9d5eafc": {
+            "king_fahd_afa_hospital": {
                 "name": "مستشفى الملك فهد للقوات المسلحة",
                 "location": "طريق الملك خالد، حي الجامعة"
             },
-            "681cc9136043a362d9d5eafd": {
+            "saudi_german_hospital": {
                 "name": "المستشفى السعودي الألماني",
                 "location": "طريق السلام، حي السلام"
             },
-            "681cc9136043a362d9d5eafe": {
+            "al_zahraa_hospital": {
                 "name": "مستشفى الزهراء",
                 "location": "علي بن أبي طالب، المدينة 42316"
             },
-            "681cc9136043a362d9d5eaff": {
+            "al_madina_national_hospital": {
                 "name": "مستشفى المدينة الوطني",
                 "location": "الشعراء، الأمير عبد المجيد بن عبد العزيز"
             }
         },
         "police": {
             "stations": {
-                "681cc8a37be1d1683e01e68b": {
+                "al_aziziyah_police_center": {
                     "name": "مركز شرطة العزيزية",
                     "location": "شارع العزيزية، حي العزيزية"
                 },
-                "681cc8a37be1d1683e01e68c": {
+                "al_kaakiya_police_center": {
                     "name": "مركز شرطة الكعكية",
                     "location": "الشوقية، مكة 24351"
                 },
-                "681cc8a37be1d1683e01e68d": {
+                "al_qarara_police_center": {
                     "name": "مركز شرطة القرارة",
                     "location": "طريق الحرم الكبير، السليمانية"
                 },
-                "681cc9136043a362d9d5eb02": {
+                "quba_police_center": {
                     "name": "مركز شرطة قباء",
                     "location": "خلاد بن رافع، عروة، المدينة 42391"
                 },
-                "681cc9136043a362d9d5eb03": {
+                "airport_police_center": {
                     "name": "مركز شرطة المطار",
                     "location": "التفيل بن سعيد النجاري، المبعوث"
                 },
-                "681cc9136043a362d9d5eb04": {
+                "uhud_police_center": {
                     "name": "مركز شرطة أحد",
                     "location": "الأمير عبد المجيد بن عبد العزيز"
                 }
@@ -158,61 +162,61 @@
             "medina": "المدينة المنورة"
         },
         "restaurants": {
-            "68343711749c9bed0d26490f": {
+            "albaik_haram": {
                 "name": "البيك - الحرم",
                 "typeOfFood": "طعام سريع وشعبي",
                 "workSchedules": "٩:٠٠ صباحًا : ٢:٠٠ صباحًا",
                 "location": "أمام المسجد الحرام في مكة"
             },
-            "68343711749c9bed0d264910": {
+            "turkish_al_mathaq": {
                 "name": "المذاق التركي",
                 "typeOfFood": "طعام تركي",
                 "workSchedules": "٦:٠٠ صباحًا : ١:٠٠ صباحًا",
                 "location": "إبراهيم الجوفيلي، مكة ٢٤٣٧٢"
             },
-            "68343711749c9bed0d264911": {
+            "al_shurfa": {
                 "name": "الشرفة",
                 "typeOfFood": "طعام شرقي وعربي",
                 "workSchedules": "١١:٠٠ صباحًا : ١٢:٠٠ صباحًا",
                 "location": "البرج الملكي، شارع أجياد"
             },
-            "68343711749c9bed0d264912": {
+            "al_rihab": {
                 "name": "الرحاب",
                 "typeOfFood": "طعام عالمي",
                 "workSchedules": "١٢:٣٠ ظهرًا : ٣:٣٠ عصرًا - ٧:٠٠ مساءً : ١٠:٣٠ مساءً",
                 "location": "فندق دار التوحيد إنتركونتيننتال"
             },
-            "68343711749c9bed0d264913": {
+            "albaik_shawkia": {
                 "name": "البيك - الشوقية",
                 "typeOfFood": "طعام سريع وشعبي",
                 "workSchedules": "١١:٠٠ صباحًا : ٢:٠٠ صباحًا",
                 "location": "الشيخ محمد بن جبير، الشوقية"
             },
-            "68343711749c9bed0d264924": {
+            "shin_yang_chinese": {
                 "name": "شينج يانج الصيني",
                 "typeOfFood": "طعام صيني",
                 "workSchedules": "١:٠٠ ظهرًا : ٢:٠٠ صباحًا",
                 "location": "حي سعيد بن سفيان القاري"
             },
-            "68343711749c9bed0d264925": {
+            "albaik_madina": {
                 "name": "البيك",
                 "typeOfFood": "طعام سريع وشعبي",
                 "workSchedules": "٩:٠٠ صباحًا : ٢:٠٠ صباحًا",
                 "location": "طريق الملك فيصل، المدينة ٤٢٣١١"
             },
-            "68343711749c9bed0d264926": {
+            "arabesque": {
                 "name": "عرابيسك",
                 "typeOfFood": "طعام عالمي",
                 "workSchedules": "٦:٠٠ صباحًا : ١١:٠٠ صباحًا",
                 "location": "بدعة، المدينة ٤٢٣١١"
             },
-            "68343711749c9bed0d264927": {
+            "abu_zeid": {
                 "name": "أبو زيد",
                 "typeOfFood": "طعام شعبي",
                 "workSchedules": "٦:٠٠ صباحًا : ١٢:٠٠ ظهرًا - ٦:٠٠ مساءً : ٢:٠٠ صباحًا",
                 "location": "الأمير عبد المجيد بن عبد العزيز"
             },
-            "68343711749c9bed0d264928": {
+            "social_house": {
                 "name": "سوشال هاوس",
                 "typeOfFood": "طعام عالمي",
                 "workSchedules": "٥:٠٠ مساءً : ١١:٠٠ مساءً",
@@ -220,156 +224,156 @@
             }
         },
         "cafes": {
-            "68343711749c9bed0d264914": {
+            "al_takya": {
                 "name": "التكية",
                 "workSchedules": "٧:٠٠ صباحًا : ١١:٠٠ مساءً",
                 "location": "إبراهيم الخليل، مكة ٢١٩٥٥"
             },
-            "68343711749c9bed0d264915": {
+            "aroma_cafe": {
                 "name": "كافيه أروما",
                 "workSchedules": "١٠:٠٠ صباحًا : ١:٠٠ صباحًا",
                 "location": "الحمراء، جدة"
             },
-            "68343711749c9bed0d264916": {
+            "orta": {
                 "name": "أورتا",
                 "workSchedules": "٥:٠٠ صباحًا : ١:٠٠ صباحًا",
                 "location": "طريق الأمير سعود بن محمد بن مقرن"
             },
-            "68343711749c9bed0d264917": {
+            "layla_garden": {
                 "name": "حديقة ليلى",
                 "workSchedules": "٢٤ ساعة يوميًا",
                 "location": "طريق الملك عبد العزيز، حي الزهراء"
             },
-            "68343711749c9bed0d264918": {
+            "doze": {
                 "name": "دوز",
                 "workSchedules": "٦:٠٠ صباحًا : ٢:٠٠ صباحًا",
                 "location": "شارع عبدالله سليمان، جدة"
             },
-            "68343711749c9bed0d264929": {
+            "etruh": {
                 "name": "إتروح",
                 "workSchedules": "٥:٠٠ مساءً : ٢:٠٠ صباحًا",
                 "location": "سالم بن يزيد، المدينة ٤٢٣١٥"
             },
-            "68343711749c9bed0d26492a": {
+            "ro_specialty": {
                 "name": "رو سبيشالتي",
                 "workSchedules": "٢٤ ساعة يوميًا",
                 "location": "طريق الملك عبدالله، المضينيب"
             },
-            "68343711749c9bed0d26492b": {
+            "kofa": {
                 "name": "كفة",
                 "workSchedules": "٦:٣٠ صباحًا : ١٢:٣٠ صباحًا",
                 "location": "طريق الملك عبدالله الفرعي، شظاة"
             },
-            "68343711749c9bed0d26492c": {
+            "leader": {
                 "name": "ليدر",
                 "workSchedules": "١٠:٠٠ صباحًا : ١٢:٠٠ صباحًا",
                 "location": "بدعة، المدينة ٤٢٣١١"
             },
-            "68343711749c9bed0d26492d": {
+            "shalaal": {
                 "name": "شلال",
                 "workSchedules": "٨:٠٠ صباحًا : ١٠:٠٠ مساءً",
                 "location": "المدينة ٤٣٥٧١"
             }
         },
         "supermarkets": {
-            "68343711749c9bed0d264919": {
+            "panda": {
                 "name": "بنده",
                 "workSchedules": "٧:٠٠ صباحًا : ١:٠٠ صباحًا",
                 "location": "غرناطة، العزيزية، جدة"
             },
-            "68343711749c9bed0d26491a": {
+            "danube": {
                 "name": "الدانوب",
                 "workSchedules": "٧:٠٠ صباحًا : ٢:٠٠ صباحًا",
                 "location": "الروابي، الرياض"
             },
-            "68343711749c9bed0d26491b": {
+            "tamimi_markets": {
                 "name": "أسواق التميمي",
                 "workSchedules": "٢٤ ساعة يوميًا",
                 "location": "طريق الأمير سعود بن محمد بن مقرن"
             },
-            "68343711749c9bed0d26491c": {
+            "othaim_markets": {
                 "name": "أسواق العثيم",
                 "workSchedules": "٧:٠٠ صباحًا : ١:٤٥ صباحًا",
                 "location": "طريق العروبة، الرياض"
             },
-            "68343711749c9bed0d26491d": {
+            "al_mazraa_markets": {
                 "name": "أسواق المزرعة",
                 "workSchedules": "٨:٠٠ صباحًا : ٢:٠٠ صباحًا",
                 "location": "٧٦٨٥ عبدالله بن إبراهيم بن سيف"
             },
-            "68343711749c9bed0d26492e": {
+            "mandarin": {
                 "name": "مندرين",
                 "workSchedules": "٢٤ ساعة يوميًا",
                 "location": "٧٨٦٨ طريق المطار، المدينة ٤٢٣٢٢"
             },
-            "68343711749c9bed0d26492f": {
+            "al_rayah": {
                 "name": "الراية",
                 "workSchedules": "٦:٠٠ صباحًا : ٣:٠٠ صباحًا",
                 "location": "طريق القصيم، المدينة ٤٢٣١٩"
             },
-            "68343711749c9bed0d264930": {
+            "tamimi_markets_medina": {
                 "name": "أسواق التميمي",
                 "workSchedules": "٢٤ ساعة يوميًا",
                 "location": "العباس بن عبادة، الرنونة"
             },
-            "68343711749c9bed0d264931": {
+            "al_khair_central_markets": {
                 "name": "أسواق الخير المركزية",
                 "workSchedules": "٢٤ ساعة يوميًا",
                 "location": "الرنونة، المدينة ٤٢٣٩٤"
             },
-            "68343711749c9bed0d264932": {
+            "al_madina_central_markets": {
                 "name": "أسواق المدينة المركزية",
                 "workSchedules": "٢٤ ساعة يوميًا",
                 "location": "الإمام البخاري، العزيزية، الدفاع"
             }
         },
         "hotels": {
-            "68343711749c9bed0d26491e": {
+            "fairmont_makkah": {
                 "name": "فيرمونت الذهبي",
                 "category": "فندق ٥ نجوم",
                 "location": "أبراج البيت، الحرم"
             },
-            "68343711749c9bed0d26491f": {
+            "dar_tawheed_intercontinental": {
                 "name": "دار التوحيد إنتركونتيننتال",
                 "category": "فندق ٥ نجوم",
                 "location": "طريق إبراهيم الخليل، الحرم"
             },
-            "68343711749c9bed0d264920": {
+            "ruzana_al_rawdah": {
                 "name": "رزانة الروضة",
                 "category": "فندق ٤ نجوم",
                 "location": "طريق المسجد الحرام، الروضة"
             },
-            "68343711749c9bed0d264921": {
+            "jawar_al_bayt": {
                 "name": "جوار البيت",
                 "category": "فندق ٣ نجوم",
                 "location": "شارع المتواف، العزيزية"
             },
-            "68343711749c9bed0d264922": {
+            "elaf_ajyad": {
                 "name": "إيلاف أجياد",
                 "category": "فندق نجمتين",
                 "location": "أجياد، مكة ٢٤٢٣١"
             },
-            "68343711749c9bed0d264933": {
+            "dar_al_taqwa": {
                 "name": "دار التقوى",
                 "category": "فندق ٥ نجوم",
                 "location": "شارع الستين، بالقرب من المسجد النبوي"
             },
-            "68343711749c9bed0d264934": {
+            "al_iman_royal": {
                 "name": "الإيمان رويال",
                 "category": "فندق ٥ نجوم",
                 "location": "طريق الملك فيصل، بدعة، المدينة ٤٢٣١١"
             },
-            "68343711749c9bed0d264935": {
+            "zawwar_international": {
                 "name": "زوار إنترناشيونال",
                 "category": "فندق ٤ نجوم",
                 "location": "الحرم، بدعة، المدينة ٤٢٣١١"
             },
-            "68343711749c9bed0d264936": {
+            "al_madina_al_jadida": {
                 "name": "المدينة الجديدة",
                 "category": "فندق ٣ نجوم",
                 "location": "شارع أبي سعيد الخدري، المدينة ٤١٤٤١"
             },
-            "68343711749c9bed0d264937": {
+            "diamond_golden_apartments": {
                 "name": "شقق الديموند الذهبية",
                 "category": "فندق نجمتين",
                 "location": "مسجد الدار، المدينة ٤٢٣١٣"
@@ -389,6 +393,7 @@
         "noDataFound": "لم يتم العثور على بيانات لهذه المدينة",
         "failedToFetchData": "فشل في جلب البيانات",
         "noUserWithPassport": "لا يوجد مستخدم بهذا الرقم الجواز",
-        "noUserWithId": "لا يوجد مستخدم بهذا المعرف"
+        "noUserWithId": "لا يوجد مستخدم بهذا المعرف",
+        "invalidApiKey": "خطأ في إعداد خدمة الطقس. يرجى المحاولة لاحقًا."
     }
 }

@@ -1,185 +1,185 @@
-import asyncHandler from "express-async-handler";
-import appError from "../Utils/appError.js";
-import User from "../Model/userModel.js";
-import sendEmail from "../Utils/sendEmail.js";
+import asyncHandler from 'express-async-handler';
+import AppError from '../Utils/appError.js';
+import User from '../Model/userModel.js';
+import sendEmail from '../Utils/sendEmail.js';
 import { v2 as cloudinary } from 'cloudinary';
 
-// Utility function to extract public_id from Cloudinary URL
+// Constant
+const DEFAULT_PHOTO_NAME = 'default.jpg';
+
+// Extract public ID from Cloudinary URL
 const getPublicIdFromUrl = (url) => {
     if (!url) return null;
-    
-    // Extract everything after the upload part excluding the extension
     const matches = url.match(/\/upload\/v\d+\/(.+)(?:\.\w+)$/);
-    
-    if (matches && matches[1]) {
-        return matches[1]; // This will include the folder path (profiles/photo-...)
-    }
-    return null;
+    return matches ? matches[1] : null;
 };
 
-// Get all users
-export const getAllUsers = asyncHandler(async (req, res, next) => {
-    const users = await User.find({ role: { $ne: 'admin' } })
-        .select('_id name photo nationality updatedAt approved createdAt alive visaExpiryDate');
+// Delete User Media from Cloudinary
+const deleteUserMedia = async (user) => {
+    const deletions = [];
 
-    res.status(200).json({
-        status: 'success',
-        result: users.length,
-        data: users,
-    });
-});
-
-//* Get a single user by ID or logged-in user if no ID is provided
-export const getUser = asyncHandler(async (req, res, next) => {
-    const userId = req.params.id || req.user._id; //* Use logged-in user ID if no ID is provided
-    const user = await User.findById(userId);
-
-    if (!user) {
-        return next(new appError('No user found with this ID', 404));
-    }
-
-    res.status(200).json({
-        status: 'success',
-        data: user,
-    });
-});
-
-//* Update a user by ID
-export const updateUser = asyncHandler(async (req, res, next) => {
-    const id = req.params.id || req.user._id; //* Use logged-in user ID if no ID is provided
-
-    //* Prepare the update data
-    const updateData = { ...req.body };
-
-    //* Manually replicate the pre('save') middleware logic
-    if (updateData.medicinesName !== undefined) {
-        updateData.medicine = !!updateData.medicinesName; //* Set medicine to true if medicinesName exists
-    }
-    if (updateData.myDiseases !== undefined) {
-        updateData.sick = !!updateData.myDiseases; //* Set sick to true if myDiseases exists
-    }
-    if (updateData.companyName !== undefined) {
-        updateData.company = !!updateData.companyName; //* Set company to true if companyName exists
-    }
-
-    //* Get the user and update
-    const oldUser = await User.findById(id);
-
-    if (!oldUser) {
-        return next(new appError('No user found with this ID', 404));
-    }
-
-    const user = await User.findByIdAndUpdate(id, updateData, {
-        new: true, // Return the updated user
-    });
-
-    if (!oldUser.approved && user.approved) {
-        try {
-            await sendEmail({
-                email: user.email,
-                subject: 'Account Approved',
-                text: 'Your account has been approved.',
-                message: `
-                    <p>Dear ${user.name},</p>
-                    <p>Your account has been approved. You can now access all features.</p>
-                    <p>Best regards,<br>The Tawaf Team</p>
-                `
-            })
-        } catch (error) {
-            console.error('Error sending approval email:', error);
-        }
-    }
-
-    res.status(200).json({ status: 'success', data: user, });
-});
-
-//* Delete a user by ID
-export const deleteUser = asyncHandler(async (req, res, next) => {
-    // Find the user first to get their image URLs
-    const id = req.params.id || req.user._id;
-    const user = await User.findById(id);
-
-    // Check if user existed
-    if (!user) {
-        return next(new appError('No user found with this ID', 404));
-    }
-
-    // Prevent admin from deleting their own account
-    if (req.user.role === 'admin' && req.user._id.toString() === id) {
-        return next(new appError('Admins cannot delete their own account', 403));
-    }
-
-    // Delete images from Cloudinary if they exist
     try {
-        // Delete profile photo
-        if (user.photo && user.photo !== 'default.jpg') {
-            const photoPublicId = getPublicIdFromUrl(user.photo);
-            console.log(photoPublicId);
-            if (photoPublicId) {
-                await cloudinary.uploader.destroy(photoPublicId);
+        // Profile Photo
+        if (user.photo && !user.photo.includes(DEFAULT_PHOTO_NAME)) {
+            const publicId = getPublicIdFromUrl(user.photo);
+            if (publicId) {
+                deletions.push(cloudinary.uploader.destroy(publicId));
             }
         }
 
-        // Delete visa document if it exists
+        // Visa document
         if (user.visa) {
-            const visaPublicId = getPublicIdFromUrl(user.visa);
-            console.log(visaPublicId);
-            if (visaPublicId) {
-                await cloudinary.uploader.destroy(visaPublicId);
+            const publicId = getPublicIdFromUrl(user.visa);
+            if (publicId) {
+                deletions.push(cloudinary.uploader.destroy(publicId));
             }
         }
 
-        // Delete Qr code
+        // Qr code
         if (user.qrcode) {
-            const qrCodePublicId = getPublicIdFromUrl(user.qrcode);
-            console.log(qrCodePublicId);
-            if (qrCodePublicId) {
-                await cloudinary.uploader.destroy(qrCodePublicId);
+            const publicId = getPublicIdFromUrl(user.qrcode);
+            if (publicId) {
+                deletions.push(cloudinary.uploader.destroy(publicId));
             }
         }
+
+        await Promise.all(deletions); // Run all in parallel
     } catch (error) {
-        console.error('Error deleting images from Cloudinary:', error);
-        // Continue with user deletion even if image deletion fails
+        console.error(`[Cloudinary] Failed to delete media for user ${user._id}:`, error.message);
     }
+}
 
-    // Delete the user from database
-    await User.findByIdAndDelete(id);
+// Send Account Approval Email
+const sendApprovalEmail = async (user) => {
+    try {
+        await sendEmail({
+            email: user.email,
+            subject: '🎉 Your Account Has Been Approved!',
+            message: `
+                <p>Dear ${user.name},</p>
+                <p>We’re happy to inform you that your account has been approved.</p>
+                <p>You can now access all features of the Tawaf platform.</p>
+                <p>Best regards,<br><strong>The Tawaf Team</strong></p>
+            `,
+            text: `Hello ${user.name}, your account has been apprved. Welcome!`
+        });
 
-    // Check if the requesting user has admin privileges
-    if (req.user.role === 'admin') {
-        // Prepare email message based on user data
+        console.log(`Approval email sent to ${user.email}`);
+    } catch (error) {
+        console.error(`[Email] Failed to send approval email to ${user.email}:`, err.message);
+    }
+}
+
+// Send Account Deletion Email
+const sendDeletionEmail = async (user, message = '') => {
+    try {
         let emailMessage = `
             <p>Dear ${user.name},</p>
             <p>Your account has been deleted from our system.</p>
         `;
-    
-        if (req.body.message) {
-            emailMessage += `
-                <p>Additional information: ${req.body.message}</p>
-            `;
+
+        if (message.trim()) {
+            emailMessage += `<p><strong>Reason:</strong> ${message}</p>`;
         }
-    
+
         emailMessage += `
             <p>If you believe this was a mistake, please contact our support team.</p>
-            <p>Best regards,<br>The Tawaf Team</p>
+            <p>Best regards,<br><strong>The Tawaf Team</strong></p>
         `;
-    
-        // Send email notification
-        try {
-            await sendEmail({
-                email: user.email,
-                subject: 'Account Deletion Notice',
-                text: 'Your account has been deleted from our system.',
-                message: emailMessage
-            });
-        } catch (err) {
-            console.error('Error sending deletion email:', err);
-            // Continue with deletion even if email fails
-        }
+
+        await sendEmail({
+            email: user.email,
+            subject: 'Account Deletion Notice',
+            message: emailMessage,
+            text: 'Your Account has been deleted from our system.'
+        });
+
+        console.log(`Deletion email sent to ${user.email}`);
+    } catch (error) {
+        console.error(`[Email] Failed to send deletion email to ${user.email}:`, err.message);
+    }
+}
+
+// Get all users (only admins)
+export const getAllUsers = asyncHandler(async (req, res, next) => {
+    const users = await User.find({ role: { $ne: 'admin' } })
+        .select('_id name photo nationality updatedAt approved createdAt alive visaExpiryDate')
+        .sort({ createdAt: -1});
+
+    res.status(200).json({
+        status: 'success',
+        result: users.length,
+        users,
+    });
+});
+
+// Get Single user by ID (self or admin)
+export const getUser = asyncHandler(async (req, res, next) => {
+    const id = req.params.id || req.user._id;
+
+    const user = await User.findById(id);
+
+    if (!user) {
+        return next(new appError('No user found with this ID', 404));
     }
 
     res.status(200).json({
         status: 'success',
-        message: 'User has been successfully deleted'
+        user,
+    });
+});
+
+// Update user
+export const updateUser = asyncHandler(async (req, res, next) => {
+    const id = req.params.id || req.user._id;
+
+    const user = await User.findById(id);
+    if (!user) {
+        return next(new AppError('No user found with this ID', 404))
+    }
+
+    const updateData = { ...req.body };
+
+    const updatedUser = await User.findByIdAndUpdate(id, updateData, {
+        new: true,
+        runValidators: true,
+    });
+
+    if (!user.approved && updatedUser.approved) {
+        await sendApprovalEmail(updatedUser);
+    }
+
+    res.status(200).json({
+        status: 'success',
+        user,
+    });
+});
+
+// Delete User
+export const deleteUser = asyncHandler(async (req, res, next) => {
+    const id = req.params.id || req.user._id;
+
+    if (req.user.role === 'admin' && req.user._id.toString() === id) {
+        return next(new AppError('Administrators cannot delete their own accounts.', 400));
+    }
+
+    const user = User.findById(id);
+    if (!user) {
+        return next(new AppError('No user found with this ID', 404));
+    }
+
+    // Delete user media from Cloudinary
+    await deleteUserMedia(user);
+
+    // Delete from DB
+    await User.findByIdAndDelete(id);
+
+    // Send deletion email
+    const reson = req.body.message ? req.body.message : undefined;
+    await sendDeletionEmail(user, reson);
+
+    res.status(200).json({
+        status: 'success',
+        message: 'User account and associated data have been successfully deleted.'
     });
 });

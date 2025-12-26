@@ -1,18 +1,17 @@
-import asyncHandler from "express-async-handler";
-import tzlookup from "tz-lookup";
-import axios from "axios";
-import dotenv from 'dotenv';
-import { reverseGeocode } from "../Utils/geocode.js";
+// controllers/weatherController.js
+import asyncHandler from 'express-async-handler';
+import axios from 'axios';
+import tzlookup from 'tz-lookup';
+import AppError from '../Utils/appError.js';
+import { reverseGeocode } from '../Utils/geocode.js';
 
-// Load environment variables
-dotenv.config();
-
+// =======================
 // Constants
-const TOMORROW_API_CONFIG = {
-    BASE_URL: 'https://api.tomorrow.io/v4/weather/forecast ',
-    API_KEY: process.env.WEATHER_API_KEY || 'OjVUTgatB1eWcTaiU6LQFmA4otnVT0uI',
-};
+// =======================
+const WEATHER_API_KEY = process.env.WEATHER_API_KEY || 'OjVUTgatB1eWcTaiU6LQFmA4otnVT0uI';
+const TOMORROW_BASE_URL = 'https://api.tomorrow.io/v4/weather/forecast';
 
+// Trim any accidental whitespace from URLs
 const weatherIcons = {
     snowyWindyClouds: 'https://res.cloudinary.com/dyd5lvwhc/image/upload/v1744023691/1_zwgvxp.png',
     partlySunnyWithRain: 'https://res.cloudinary.com/dyd5lvwhc/image/upload/v1744023690/2_gqgpf3.png',
@@ -20,22 +19,37 @@ const weatherIcons = {
     cloudyWithSnow: 'https://res.cloudinary.com/dyd5lvwhc/image/upload/v1744023692/4_lu5a3x.png',
     sunnyClearSky: 'https://res.cloudinary.com/dyd5lvwhc/image/upload/v1744023693/5_lzbeao.png',
     overcastClouds: 'https://res.cloudinary.com/dyd5lvwhc/image/upload/v1744023692/6_pon5zm.png',
-    partlySunnyWithRain2: 'https://res.cloudinary.com/dyd5lvwhc/image/upload/v1744023693/7_hix73d.png',
+    partlySunnyWithRain2: 'https://res.cloudinary.com/dyd5lvwhc/image/upload/v1744023693/7_hix73d.png'
 };
 
-// Utility functions
+// In-memory cache with TTL (prevent memory leaks)
+const CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutes
+const weatherCache = new Map();
+
+// Utility: Safe translation fallback
+const safeT = (t, key, defaultValue) => {
+    if (typeof t === 'function') {
+        const result = t(key);
+        if (result && result !== key) return result;
+    }
+    return defaultValue || (Array.isArray(key) ? key[0] : key).split('.').pop();
+};
+
+// =======================
+// Formatter Utilities
+// =======================
 const formatters = {
     windSpeed: (speedInMS, lang) => {
         const value = speedInMS ? (speedInMS * 3.6).toFixed(1) : '0.0';
-        return lang === 'ar' ? value.replace(/[0-9]/g, (d) => '٠١٢٣٤٥٦٧٨٩'[d]) : value;
+        return lang === 'ar' ? value.replace(/[0-9]/g, d => '٠١٢٣٤٥٦٧٨٩'[d]) : value;
     },
     percentage: (value, lang) => {
         const formatted = parseFloat(value ?? 0).toFixed(1);
-        return lang === 'ar' ? formatted.replace(/[0-9]/g, (d) => '٠١٢٣٤٥٦٧٨٩'[d]) : formatted;
+        return lang === 'ar' ? formatted.replace(/[0-9]/g, d => '٠١٢٣٤٥٦٧٨٩'[d]) : formatted;
     },
     temperature: (value, lang) => {
         const formatted = parseFloat(value ?? 0).toFixed(1);
-        return lang === 'ar' ? formatted.replace(/[0-9]/g, (d) => '٠١٢٣٤٥٦٧٨٩'[d]) : formatted;
+        return lang === 'ar' ? formatted.replace(/[0-9]/g, d => '٠١٢٣٤٥٦٧٨٩'[d]) : formatted;
     },
     time: (isoString, lat, lon, lang) => {
         if (!isoString) return lang === 'ar' ? '—' : '--';
@@ -50,52 +64,55 @@ const formatters = {
                 minute: '2-digit'
             });
         } catch (error) {
-            console.error('Error formatting time:', error.message);
-            return lang === 'ar' ? 'خطأ في الوقت' : 'Time error';
+            console.warn('Time formatting failed:', error.message);
+            return lang === 'ar' ? 'خطأ' : 'Error';
         }
     }
 };
 
-// Get day part based on hour
+// =======================
+// Get Day Part (Morning, Afternoon, etc.)
+// =======================
 const getDayPart = (hour, t) => {
-    if (hour >= 5 && hour < 12) return t('weather.timeOfDay.morning') ?? 'Morning';
-    if (hour >= 12 && hour < 17) return t('weather.timeOfDay.afternoon') ?? 'Afternoon';
-    if (hour >= 17 && hour < 22) return t('weather.timeOfDay.evening') ?? 'Evening';
-    return t('weather.timeOfDay.night') ?? 'Night';
+    if (hour >= 5 && hour < 12) return safeT(t, 'weather.timeOfDay.morning', 'Morning');
+    if (hour >= 12 && hour < 17) return safeT(t, 'weather.timeOfDay.afternoon', 'Afternoon');
+    if (hour >= 17 && hour < 22) return safeT(t, 'weather.timeOfDay.evening', 'Evening');
+    return safeT(t, 'weather.timeOfDay.night', 'Night');
 };
 
-// Weather code to description mapping
-const getWeatherDescription = (weatherCode, t) => {
-    const descriptions = {
-        1000: t('weather.weatherDescription.Clear, sunny'),
-        1100: t('weather.weatherDescription.Mostly clear'),
-        1101: t('weather.weatherDescription.Partly cloudy'),
-        1102: t('weather.weatherDescription.Mostly cloudy'),
-        1001: t('weather.weatherDescription.Cloudy'),
-        2000: t('weather.weatherDescription.Fog'),
-        2100: t('weather.weatherDescription.Light fog'),
-        4000: t('weather.weatherDescription.Drizzle'),
-        4001: t('weather.weatherDescription.Rain'),
-        4200: t('weather.weatherDescription.Light rain'),
-        4201: t('weather.weatherDescription.Heavy rain'),
-        5000: t('weather.weatherDescription.Snow'),
-        5001: t('weather.weatherDescription.Flurries'),
-        5100: t('weather.weatherDescription.Light snow'),
-        5101: t('weather.weatherDescription.Heavy snow'),
-        6000: t('weather.weatherDescription.Freezing drizzle'),
-        6001: t('weather.weatherDescription.Freezing rain'),
-        6200: t('weather.weatherDescription.Light freezing rain'),
-        6201: t('weather.weatherDescription.Heavy freezing rain'),
-        7000: t('weather.weatherDescription.Ice pellets'),
-        7101: t('weather.weatherDescription.Heavy ice pellets'),
-        7102: t('weather.weatherDescription.Light ice pellets'),
-        8000: t('weather.weatherDescription.Thunderstorm'),
+// =======================
+// Weather Code Mapping
+// =======================
+const getWeatherDescription = (code, t) => {
+    const map = {
+        1000: safeT(t, 'weather.weatherDescription.Clear, sunny', 'Clear, sunny'),
+        1100: safeT(t, 'weather.weatherDescription.Mostly clear', 'Mostly clear'),
+        1101: safeT(t, 'weather.weatherDescription.Partly cloudy', 'Partly cloudy'),
+        1102: safeT(t, 'weather.weatherDescription.Mostly cloudy', 'Mostly cloudy'),
+        1001: safeT(t, 'weather.weatherDescription.Cloudy', 'Cloudy'),
+        2000: safeT(t, 'weather.weatherDescription.Fog', 'Fog'),
+        2100: safeT(t, 'weather.weatherDescription.Light fog', 'Light fog'),
+        4000: safeT(t, 'weather.weatherDescription.Drizzle', 'Drizzle'),
+        4001: safeT(t, 'weather.weatherDescription.Rain', 'Rain'),
+        4200: safeT(t, 'weather.weatherDescription.Light rain', 'Light rain'),
+        4201: safeT(t, 'weather.weatherDescription.Heavy rain', 'Heavy rain'),
+        5000: safeT(t, 'weather.weatherDescription.Snow', 'Snow'),
+        5001: safeT(t, 'weather.weatherDescription.Flurries', 'Flurries'),
+        5100: safeT(t, 'weather.weatherDescription.Light snow', 'Light snow'),
+        5101: safeT(t, 'weather.weatherDescription.Heavy snow', 'Heavy snow'),
+        6000: safeT(t, 'weather.weatherDescription.Freezing drizzle', 'Freezing drizzle'),
+        6001: safeT(t, 'weather.weatherDescription.Freezing rain', 'Freezing rain'),
+        6200: safeT(t, 'weather.weatherDescription.Light freezing rain', 'Light freezing rain'),
+        6201: safeT(t, 'weather.weatherDescription.Heavy freezing rain', 'Heavy freezing rain'),
+        7000: safeT(t, 'weather.weatherDescription.Ice pellets', 'Ice pellets'),
+        7101: safeT(t, 'weather.weatherDescription.Heavy ice pellets', 'Heavy ice pellets'),
+        7102: safeT(t, 'weather.weatherDescription.Light ice pellets', 'Light ice pellets'),
+        8000: safeT(t, 'weather.weatherDescription.Thunderstorm', 'Thunderstorm')
     };
-    return descriptions[weatherCode] ?? t('weather.weatherDescription.Unknown') ?? 'Unknown';
+    return map[code] || safeT(t, 'weather.weatherDescription.Unknown', 'Unknown');
 };
 
-// Map weather code to icon URL
-const getWeatherIcon = (weatherCode) => {
+const getWeatherIcon = (code) => {
     const iconMap = {
         1000: weatherIcons.sunnyClearSky,
         1100: weatherIcons.partlySunnyWithRain2,
@@ -119,275 +136,230 @@ const getWeatherIcon = (weatherCode) => {
         7000: weatherIcons.cloudyWithSnow,
         7101: weatherIcons.cloudyWithSnow,
         7102: weatherIcons.cloudyWithSnow,
-        8000: weatherIcons.partlySunnyWithThunderstorms,
+        8000: weatherIcons.partlySunnyWithThunderstorms
     };
-    return iconMap[weatherCode] ?? weatherIcons.sunnyClearSky;
+    return iconMap[code] || weatherIcons.sunnyClearSky;
 };
 
-// Generate current weather description
-const getCurrentWeatherDescription = (data, t, lang) => {
-    const baseDescription = getWeatherDescription(data.weatherCode, t);
-    let tempDescription = '';
-    const temperature = parseFloat(data[t('weather.temperature')] ?? 0);
-    if (temperature >= 30) {
-        tempDescription = t('weather.weatherDescription.hot') ?? 'hot';
-    } else if (temperature >= 20) {
-        tempDescription = t('weather.weatherDescription.warm') ?? 'warm';
-    } else if (temperature >= 10) {
-        tempDescription = t('weather.weatherDescription.cool') ?? 'cool';
-    } else {
-        tempDescription = t('weather.weatherDescription.cold') ?? 'cold';
-    }
-    let precipDescription = '';
-    const rainChance = parseFloat(data[t('weather.rainChance')] ?? 0);
-    if (rainChance > 70) {
-        precipDescription = t('weather.weatherDescription.high chance of precipitation') ?? 'high chance of precipitation';
-    } else if (rainChance > 30) {
-        precipDescription = t('weather.weatherDescription.moderate chance of precipitation') ?? 'moderate chance of precipitation';
-    } else if (rainChance > 10) {
-        precipDescription = t('weather.weatherDescription.slight chance of precipitation') ?? 'slight chance of precipitation';
-    } else {
-        precipDescription = t('weather.weatherDescription.dry conditions') ?? 'dry conditions';
-    }
+// =======================
+// Generate Current Weather Summary
+// =======================
+const getCurrentWeatherSummary = (data, t, lang) => {
+    const baseDesc = getWeatherDescription(data.weatherCode, t);
+    const temp = parseFloat(data.temperature?.replace(/[٠-٩]/g, d => '0123456789'['٠١٢٣٤٥٦٧٨٩'.indexOf(d)]) || 0);
+    const rainChance = parseFloat(data.rainChance?.replace(/[٠-٩]/g, d => '0123456789'['٠١٢٣٤٥٦٧٨٩'.indexOf(d)]) || 0);
+
+    let tempDesc = temp >= 30 ? 'hot' :
+                    temp >= 20 ? 'warm' :
+                    temp >= 10 ? 'cool' : 'cold';
+    tempDesc = safeT(t, `weather.temp.${tempDesc}`, tempDesc);
+
+    let precipDesc = rainChance > 70 ? 'high chance of precipitation' :
+                    rainChance > 30 ? 'moderate chance of precipitation' :
+                    rainChance > 10 ? 'slight chance of precipitation' : 'dry conditions';
+    precipDesc = safeT(t, `weather.precip.${precipDesc}`, precipDesc);
+
     return lang === 'ar'
-        ? `${baseDescription} مع درجات حرارة ${tempDescription} و${precipDescription}`
-        : `${baseDescription} with ${tempDescription} temperatures and ${precipDescription}`;
+        ? `${baseDesc} مع درجات حرارة ${tempDesc} و${precipDesc}`
+        : `${baseDesc} with ${tempDesc} temperatures and ${precipDesc}`;
 };
 
-// Cache for weather data
-const cache = {};
+// =======================
+// Weather Service Client
+// =======================
+class WeatherClient {
+    constructor(apiKey) {
+        this.apiKey = apiKey;
+        this.client = axios.create({
+            baseURL: TOMORROW_BASE_URL,
+            headers: { 'Accept': 'application/json' }
+        });
+    }
 
-// API client
-const weatherClient = {
-    headers: {
-        'Accept-Encoding': 'gzip, deflate, br',
-        'Accept': 'application/json'
-    },
-    async fetchWeatherData(lat, lon, params) {
-        const retryFetch = async (retries = 3, delay = 1000) => {
-            try {
-                const response = await axios.get(TOMORROW_API_CONFIG.BASE_URL, {
-                    params: {
-                        location: `${lat},${lon}`,
-                        apikey: TOMORROW_API_CONFIG.API_KEY,
-                        units: 'metric',
-                        ...params
-                    },
-                    headers: this.headers
-                });
-                return response.data;
-            } catch (error) {
-                if (retries > 0 && error.response?.status === 429) {
-                    await new Promise(resolve => setTimeout(resolve, delay));
-                    return retryFetch(retries - 1, delay * 2);
-                }
-                throw error;
+    async fetch(params, retries = 3) {
+        try {
+            const response = await this.client.get('', {
+                params: { apikey: this.apiKey, ...params },
+                timeout: 10000
+            });
+            return response.data;
+        } catch (error) {
+            if (retries > 0 && error.response?.status === 429) {
+                const delay = 1000 * Math.pow(2, 3 - retries);
+                await new Promise(resolve => setTimeout(resolve, delay));
+                return this.fetch(params, retries - 1);
             }
-        };
-        return retryFetch();
-    },
+            throw error;
+        }
+    }
 
-    async getCurrentWeather(lat, lon, t, lang) {
-        const dailyResponse = await this.fetchWeatherData(lat, lon, {
-            timesteps: 'daily',
-            fields: ['temperature', 'windSpeed', 'humidity', 'precipitationProbability', 'sunriseTime', 'sunsetTime', 'weatherCode']
-        });
+    async getCurrentAndForecast(lat, lon, t, lang) {
+        const [hourlyRes, dailyRes] = await Promise.all([
+            this.fetch({
+                location: `${lat},${lon}`,
+                timesteps: 'hourly',
+                fields: ['temperature', 'windSpeed', 'humidity', 'precipitationProbability', 'weatherCode'],
+                startTime: 'now',
+                endTime: 'nowPlus24h'
+            }),
+            this.fetch({
+                location: `${lat},${lon}`,
+                timesteps: 'daily',
+                fields: [
+                    'temperatureAvg', 'temperatureMax', 'temperatureMin',
+                    'sunriseTime', 'sunsetTime', 'precipitationProbability', 'weatherCode'
+                ],
+                startTime: 'now',
+                endTime: 'nowPlus7d'
+            })
+        ]);
 
-        const dailyData = dailyResponse.timelines.daily[0]?.values;
-        if (!dailyData) throw new Error(t('error.dailyWeatherDataNotFound') ?? 'Daily weather data not found');
+        const now = new Date();
+        const currentHour = now.getHours();
+        const timeZone = tzlookup(lat, lon);
 
-        const minutelyResponse = await this.fetchWeatherData(lat, lon, {
-            timesteps: 'minutely',
-            fields: ['temperature', 'windSpeed', 'humidity', 'precipitationProbability', 'weatherCode']
-        });
+        // Extract current values
+        const currentValues = hourlyRes.timelines.hourly[0]?.values || {};
+        const dailyValues = dailyRes.timelines.daily[0]?.values || {};
 
-        const minutelyData = minutelyResponse.timelines.minutely[0]?.values;
-
-        // Fetch hourly forecast to get current day's temperature variations
-        const hourlyResponse = await this.fetchWeatherData(lat, lon, {
-            timesteps: 'hourly',
-            fields: ['temperature']
-        });
-
-        const currentDayTemperatures = {
-            morning: null,
-            afternoon: null,
-            evening: null,
-            night: null
-        };
-
-        hourlyResponse.timelines.hourly.forEach(hour => {
-            const hourDate = new Date(hour.time);
-            const hourOfDay = hourDate.getHours();
-            const temp = hour.values.temperature;
-
-            const partOfDay = getDayPart(hourOfDay, t); // Use existing helper function
-
-            if (partOfDay === t('weather.timeOfDay.morning')) {
-                currentDayTemperatures.morning = formatters.temperature(temp, lang);
-            } else if (partOfDay === t('weather.timeOfDay.afternoon')) {
-                currentDayTemperatures.afternoon = formatters.temperature(temp, lang);
-            } else if (partOfDay === t('weather.timeOfDay.evening')) {
-                currentDayTemperatures.evening = formatters.temperature(temp, lang);
-            } else if (partOfDay === t('weather.timeOfDay.night')) {
-                currentDayTemperatures.night = formatters.temperature(temp, lang);
-            }
-        });
-
-        const weatherCode = minutelyData?.weatherCode ?? dailyData?.weatherCode ?? 1000;
-
-        const currentData = {
-            temperature: formatters.temperature(minutelyData?.temperature ?? 0, lang),
-            windSpeed: formatters.windSpeed(minutelyData?.windSpeed ?? 0, lang),
-            humidity: formatters.percentage(minutelyData?.humidity ?? 0, lang),
-            rainChance: formatters.percentage(minutelyData?.precipitationProbability ?? 0, lang),
-            sunrise: formatters.time(dailyData?.sunriseTime, lat, lon, lang),
-            sunset: formatters.time(dailyData?.sunsetTime, lat, lon, lang),
-            weatherCode: weatherCode,
-            icon: getWeatherIcon(weatherCode),
+        const current = {
+            temperature: formatters.temperature(currentValues.temperature, lang),
+            windSpeed: formatters.windSpeed(currentValues.windSpeed, lang),
+            humidity: formatters.percentage(currentValues.humidity, lang),
+            rainChance: formatters.percentage(currentValues.precipitationProbability, lang),
+            sunrise: formatters.time(dailyValues.sunriseTime, lat, lon, lang),
+            sunset: formatters.time(dailyValues.sunsetTime, lat, lon, lang),
+            weatherCode: currentValues.weatherCode || dailyValues.weatherCode || 1000,
+            icon: getWeatherIcon(currentValues.weatherCode || 1000)
         };
 
-        return {
-            ...currentData,
-            [t('weather.description')]: getCurrentWeatherDescription(currentData, t, lang)
-        };
-    },
+        // Parse hourly data for day parts
+        const currentDayTemperatures = { morning: null, afternoon: null, evening: null, night: null };
+        for (const hour of hourlyRes.timelines.hourly) {
+            const h = new Date(hour.time).getHours();
+            const part = getDayPart(h, t);
+            const temp = formatters.temperature(hour.values.temperature, lang);
 
-    async getWeatherForecast(lat, lon, t, lang) {
-        const response = await this.fetchWeatherData(lat, lon, {
-            timesteps: '1d',
-            startTime: 'now',
-            endTime: 'nowPlus7d',
-            fields: ['temperature', 'weatherCode', 'sunriseTime', 'sunsetTime', 'precipitationProbability']
-        });
+            if (part === safeT(t, 'weather.timeOfDay.morning')) currentDayTemperatures.morning = temp;
+            else if (part === safeT(t, 'weather.timeOfDay.afternoon')) currentDayTemperatures.afternoon = temp;
+            else if (part === safeT(t, 'weather.timeOfDay.evening')) currentDayTemperatures.evening = temp;
+            else if (part === safeT(t, 'weather.timeOfDay.night')) currentDayTemperatures.night = temp;
+        }
 
-        return response.timelines.daily.map(day => {
+        // Build forecast
+        const dailyTemperatures = dailyRes.timelines.daily.map(day => {
             const date = new Date(day.time);
-            const dayKey = date.toLocaleDateString('en-US', { weekday: 'long' });
-            const localizedDay = t(`weather.dayName.${dayKey}`) ?? dayKey;
-            const precipitationProbability = day.values.precipitationProbability ?? 0;
-            const rainChance = formatters.percentage(precipitationProbability, lang);
+            const dayName = new Intl.DateTimeFormat(lang === 'ar' ? 'ar-EG' : 'en-US', { weekday: 'long' }).format(date);
+            const localizedDay = safeT(t, `weather.dayName.${dayName}`, dayName);
             return {
                 dayName: localizedDay,
                 date: date.toLocaleDateString(lang === 'ar' ? 'ar-EG' : 'en-US'),
                 temperature: {
-                    avg: formatters.temperature(day.values.temperatureAvg ?? 0, lang),
-                    max: formatters.temperature(day.values.temperatureMax ?? 0, lang),
-                    min: formatters.temperature(day.values.temperatureMin ?? 0, lang)
+                    avg: formatters.temperature(day.values.temperatureAvg, lang),
+                    max: formatters.temperature(day.values.temperatureMax, lang),
+                    min: formatters.temperature(day.values.temperatureMin, lang)
                 },
-                weatherCode: day.values.weatherCode ?? day.values.weatherCodeMax ?? 1000,
-                weatherDescription: getWeatherDescription(day.values.weatherCode ?? 1000, t),
-                icon: getWeatherIcon(day.values.weatherCode ?? 1000),
+                weatherCode: day.values.weatherCode || 1000,
+                weatherDescription: getWeatherDescription(day.values.weatherCode, t),
+                icon: getWeatherIcon(day.values.weatherCode),
                 sunrise: formatters.time(day.values.sunriseTime, lat, lon, lang),
                 sunset: formatters.time(day.values.sunsetTime, lat, lon, lang),
-                rainChance
+                rainChance: formatters.percentage(day.values.precipitationProbability, lang)
             };
         });
-    }
-};
 
-// Controller to get weather data
-export const getWeather = asyncHandler(async (req, res, next) => {
-    let t = req.t || ((key) => key);
-    try {
-        // Extract language from query parameter (e.g., ?lng=en or ?lng=ar)
-        const lang = req.query.lng || 'en'; // Default to English if no language is provided
-        req.i18n.changeLanguage(lang); // Change language based on query parameter
-        t = req.t; // i18next translation function
-
-        // Extract latitude and longitude from request parameters
-        const { lat, lon } = req.params;
-
-        // Validate the coordinates
-        if (!lat || !lon) {
-            return res.status(400).json({
-                error: t('error.missingCoordinates') ?? 'Missing coordinates'
-            });
-        }
-
-        // Convert to numbers and validate ranges
-        const latitude = Number(lat);
-        const longitude = Number(lon);
-        if (isNaN(latitude) || latitude < -90 || latitude > 90) {
-            return res.status(400).json({
-                error: t('error.invalidLatitude') ?? 'Invalid latitude'
-            });
-        }
-        if (isNaN(longitude) || longitude < -180 || longitude > 180) {
-            return res.status(400).json({
-                error: t('error.invalidLongitude') ?? 'Invalid longitude'
-            });
-        }
-
-        // Check cache
-        const cacheKey = `${latitude},${longitude},${lang}`;
-        if (cache[cacheKey] && Date.now() - cache[cacheKey].timestamp < 10 * 60 * 1000) {
-            return res.status(200).json(cache[cacheKey].data);
-        }
-
-        // Fetch weather data
-        const [current, dailyTemperatures] = await Promise.all([
-            weatherClient.getCurrentWeather(latitude, longitude, t, lang),
-            weatherClient.getWeatherForecast(latitude, longitude, t, lang)
-        ]);
-
-        const locationData = await reverseGeocode(latitude, longitude, lang);
-
-        const hourlyResponse = await weatherClient.fetchWeatherData(latitude, longitude, {
-            timesteps: 'hourly',
-            fields: ['temperature']
-        });
-
-        const currentDayTemperatures = {
-            morning: null,
-            afternoon: null,
-            evening: null,
-            night: null
+        return {
+            current: {
+                ...current,
+                description: getCurrentWeatherSummary(current, t, lang)
+            },
+            currentDayTemperatures,
+            dailyTemperatures
         };
+    }
+}
 
-        hourlyResponse.timelines.hourly.forEach(hour => {
-            const hourDate = new Date(hour.time);
-            const hourOfDay = hourDate.getHours();
-            const temp = hour.values.temperature;
+// =======================
+// Controller: Get Weather
+// =======================
+export const getWeather = asyncHandler(async (req, res, next) => {
+    const { lat, lon } = req.params;
+    const lang = req.query.lng || 'en';
+    const t = req.t || ((key) => key); // Fallback translator
 
-            const partOfDay = getDayPart(hourOfDay, t);
+    // Validate coordinates
+    const latitude = parseFloat(lat);
+    const longitude = parseFloat(lon);
 
-            if (partOfDay === t('weather.timeOfDay.morning')) {
-                currentDayTemperatures.morning = formatters.temperature(temp, lang);
-            } else if (partOfDay === t('weather.timeOfDay.afternoon')) {
-                currentDayTemperatures.afternoon = formatters.temperature(temp, lang);
-            } else if (partOfDay === t('weather.timeOfDay.evening')) {
-                currentDayTemperatures.evening = formatters.temperature(temp, lang);
-            } else if (partOfDay === t('weather.timeOfDay.night')) {
-                currentDayTemperatures.night = formatters.temperature(temp, lang);
+    if (!lat || !lon || isNaN(latitude) || isNaN(longitude)) {
+        return next(new AppError(safeT(t, 'error.missingCoordinates', 'Missing or invalid coordinates'), 400));
+    }
+
+    if (latitude < -90 || latitude > 90) {
+        return next(new AppError(safeT(t, 'error.invalidLatitude', 'Invalid latitude'), 400));
+    }
+
+    if (longitude < -180 || longitude > 180) {
+        return next(new AppError(safeT(t, 'error.invalidLongitude', 'Invalid longitude'), 400));
+    }
+
+    // Check cache
+    const cacheKey = `${latitude},${longitude},${lang}`;
+    const cached = weatherCache.get(cacheKey);
+    const now = Date.now();
+
+    if (cached && now - cached.timestamp < CACHE_TTL_MS) {
+        return res.status(200).json(cached.data);
+    }
+
+    try {
+        // Initialize client
+        const weatherClient = new WeatherClient(WEATHER_API_KEY);
+        const { current, currentDayTemperatures, dailyTemperatures } = await weatherClient.getCurrentAndForecast(
+            latitude, longitude, t, lang
+        );
+
+        // Reverse geocode
+        let locationStr = `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
+        try {
+            const geoData = await reverseGeocode(latitude, longitude, lang);
+            if (geoData.city || geoData.country) {
+                locationStr = [geoData.city, geoData.country].filter(Boolean).join(', ');
             }
-        });
+        } catch (err) {
+            console.warn(`Geocoding failed for [${latitude}, ${longitude}]:`, err.message);
+        }
 
+        // Prepare response
         const responseData = {
-            location: `${locationData.city}, ${locationData.country}`,
+            location: locationStr,
             current,
+            currentDayTemperatures,
             dailyTemperatures,
-            currentDayTemperatures,  // Added here only
             direction: lang === 'ar' ? 'rtl' : 'ltr'
         };
 
-        // Update cache
-        cache[cacheKey] = {
-            timestamp: Date.now(),
-            data: responseData
-        };
+        // Cache response
+        weatherCache.set(cacheKey, {
+            timestamp: now,
+            ...responseData
+        });
+
+        // Cleanup old entries (optional)
+        if (weatherCache.size > 100) {
+            const firstKey = weatherCache.keys().next().value;
+            weatherCache.delete(firstKey);
+        }
 
         res.status(200).json(responseData);
     } catch (error) {
         console.error('Weather API Error:', error.response?.data || error.message);
-        if (error.response?.status === 429) {
-            return res.status(429).json({
-                error: t('error.rateLimitExceeded') ?? 'Rate limit exceeded. Please try again later.'
-            });
+        if (error.response?.status === 401) {
+            return next(new AppError(safeT(t, 'error.invalidApiKey', 'Weather service configuration error.'), 500));
         }
-        res.status(500).json({
-            error: t('error.failedToFetchWeather') ?? 'Failed to fetch weather data',
-            details: error.response?.data || error.message
-        });
+        if (error.response?.status === 429) {
+            return next(new AppError(safeT(t, 'error.rateLimitExceeded', 'Too many requests. Please try again later.'), 429));
+        }
+        return next(new AppError(safeT(t, 'error.failedToFetchWeather', 'Failed to retrieve weather data.'), 500));
     }
 });

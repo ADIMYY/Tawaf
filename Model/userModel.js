@@ -6,20 +6,28 @@ const userSchema = new mongoose.Schema(
         name: {
             type: String,
             required: true,
+            minlength: 2,
         },
         slug: {
             type: String, 
             lowercase: true,
+            trim: true,
         },
         passPortNumber: {
             type: String,
             required: true,
+            index: true,
             unique: true,
+            trim: true,
         },
-        state: String,
+        state: {
+            type: String,
+            trim: true,
+        },
         nationality: {
             type: String,
             required: true,
+            trim: true,
         },
         photo: {
             type: String,
@@ -29,17 +37,21 @@ const userSchema = new mongoose.Schema(
         email: {
             type: String,
             required: true,
+            index: true,
             unique: true,
             lowercase: true,
+            trim: true,
         },
         password: {
             type: String,
             required: true,
+            minlength: 8, 
             select: false,
         },
         birthDate: {
             type: String,
             required: true,
+            trim: true,
         },
         hashedCode: String,
         hashedCodeExpires: Date,
@@ -52,19 +64,25 @@ const userSchema = new mongoose.Schema(
         approved: {
             type: Boolean,
             default: false,
+            index: true,
         },
         passwordChangeAt: Date,
         gender: {
             type: String,
             required: true,
+            enum: ['male', 'female'],
+            trim: true,
         },
         userPhone: {
             type: String,
             required: true,
+            trim: false,
         },
         maritalStatus: {
             type: String,
             required: true,
+            enum: ['single', 'married', 'divorced', 'widowed', 'bachelor'],
+            trim: true,
         },
         relativePhone: {
             type: String,
@@ -73,6 +91,7 @@ const userSchema = new mongoose.Schema(
         relationship: {
             type: String,
             required: true,
+            trim: false,
         },
         sick: {
             type: Boolean,
@@ -98,7 +117,10 @@ const userSchema = new mongoose.Schema(
             type: String,
             required: function() { return this.company === true },
         },
-        companyNumber: String,
+        companyNumber: {
+            type: String,
+            trim: true,
+        },
         qrcode: String,
         alive: {
             type: Boolean,
@@ -106,7 +128,8 @@ const userSchema = new mongoose.Schema(
         },
         location: {
             type: String,
-            default: "",
+            default: '',
+            trim: true,
         },
         visa: {
             type: String,
@@ -114,18 +137,23 @@ const userSchema = new mongoose.Schema(
         },
         visaExpiryDate: {
             type: Date,
-            default: "",
+            default: null,
         },
     }, { timestamps: true }
 );
 
+userSchema.index({ approved: 1, role: 1 });
+
 userSchema.pre(/^save/, async function(next) {
+    if (!this.isModified('password')) return next();
+
     try {
-        if (this.isModified('password')) {
-            this.password = await bcrypt.hash(this.password, 12);
+        this.password = await bcrypt.hash(this.password, 12);
+        if (!this.isNew) {
+            this.passwordChangeAt = Date.now() - 1000
         }
         next();
-    } catch (error) {
+    } catch(error) {
         next(error);
     }
 });

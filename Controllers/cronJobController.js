@@ -3,95 +3,134 @@ import { v2 as cloudinary } from 'cloudinary';
 
 import User from '../Model/userModel.js';
 import sendEmail from "../Utils/sendEmail.js";
+import AppError from "../Utils/appError.js";
 
-// ! Utility function to extract public_id from Cloudinary URL
+// Constant
+const DEFAULT_PROFILE_PHOTO = 'default.jpg';
+
+// Utility function to extract public ID from Cloudinary URL
 const getPublicIdFromUrl = (url) => {
     if (!url) return null;
     const matches = url.match(/\/upload\/v\d+\/(.+)(?:\.\w+)$/);
-    if (matches && matches[1]) {
-        return matches[1];
-    }
-    return null;
+    return matches ? matches[1] : null;
 };
 
-// ! Function to delete user's images from Cloudinary
-const deleteUserImages = async (user) => {
+// Delete User's Media from Cloudinary
+const deleteUserMedia = async (user) => {
+    const deletions = [];
+
     try {
-        // Delete profile photo
-        if (user.photo && user.photo !== 'default.jpg') {
-            const photoPublicId = getPublicIdFromUrl(user.photo);
-            if (photoPublicId) {
-                await cloudinary.uploader.destroy(photoPublicId);
+        // Only attempt deletion if URL exists and not default
+        if (user.photo && !user.photo.includes(DEFAULT_PROFILE_PHOTO)) {
+            const publicId = getPublicIdFromUrl(user.photo);
+            if (publicId) {
+                deletions.push(cloudinary.uploader.destroy(publicId));
             }
         }
 
-        // Delete visa document
         if (user.visa) {
-            const visaPublicId = getPublicIdFromUrl(user.visa);
-            if (visaPublicId) {
-                await cloudinary.uploader.destroy(visaPublicId);
+            const publicId = getPublicIdFromUrl(user.visa);
+            if (publicId) {
+                deletions.push(cloudinary.uploader.destroy(publicId));
             }
         }
 
-        // Delete QR code
         if (user.qrcode) {
-            const qrCodePublicId = getPublicIdFromUrl(user.qrcode);
-            if (qrCodePublicId) {
-                await cloudinary.uploader.destroy(qrCodePublicId);
+            const publicId = getPublicIdFromUrl(user.qrcode);
+            if (publicId) {
+                deletions.push(cloudinary.uploader.destroy(publicId));
             }
         }
+
+        // Run all deletions in parallel
+        await Promise.all(deletions);
     } catch (error) {
-        console.error(`Error deleting images for user ${user._id} from Cloudinary:`, error);
-        // Continue with the process even if image deletion fails
+        console.error(`[Cloudinary] Failed to delete media for user ${user._id}:`, error.message);
     }
 };
 
-// ! Function to send deletion notification email
+// Send Account Deletion Notification Email
 const sendDeletionEmail = async (user) => {
+    if (!user.email) {
+        console.warn(`No email address for user ${user._id}, skipping notification.`);
+        return;
+    }
+
     try {
-        const emailMessage = `
-            <p>Dear ${user.name},</p>
-            <p>Your account has been automatically deleted from our system due to an expired visa.</p>
-            <p>Your visa expired on ${new Date(user.visaExpiryDate).toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-            })}.</p>
-            <p>If you believe this was a mistake or need to reactivate your account, please contact our support team.</p>
-            <p>Best regards,<br>The Tawaf Team</p>
+        const expiryDate = new Date(user.visaExpiryDate).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+
+        const message = `
+            <p>Dear ${user.name || 'User'},</p>
+            <p>We regret to inform you that your account has been automatically deactivated due to an expired visa (expired on ${expiryDate}).</p>
+            <p>If you believe this was a mistake or wish to renew your registration, please contact our support team.</p>
+            <p>Thank you,<br><strong>The Tawaf Team</strong></p>
         `;
 
         await sendEmail({
             email: user.email,
             subject: 'Account Deletion Notice - Expired Visa',
-            text: 'Your account has been deleted due to an expired visa.',
-            message: emailMessage
+            text: 'Your account has been deactivated due to an expired visa.',
+            message
         });
+
+        console.log(`Deletion email sent to user ${user._id} at ${user.email}`);
     } catch (error) {
-        console.error(`Error sending deletion email to user ${user._id}:`, error);
-        // Continue with the process even if email sending fails
+        console.error(`[Email] Failed to send deletion email to ${user.email} (ID: ${user._id}):`, error.message);
     }
 };
 
+// Main Controller: Delete User with Expired Visa
 export const deleteUserWithExpiredVisa = asyncHandler(async (req, res, next) => {
-    const currentDate = new Date();
-    const expiredUsers = await User.find({
-        visaExpiryDate: { $lte: currentDate, $ne: null },
-        role: { $ne: 'admin' } // Exclude admin users
-    });
+    const now = new Date();
 
-    if (expiredUsers.length === 0) {
-        return res.status(200).json({ status: 'success', message: 'No users with expired visas found.' });
+    try {
+        const expiredUsers = await User.find({
+            visaExpiryDate: { $lt: now, $ne: null },
+            role: { $ne: 'admin' }
+        }).select('name email photo visa qrcode visaExpiryDate');
+
+        if (expiredUsers.length === 0) {
+            return res.status(200).json({
+                status: 'success',
+                message: 'No users found with expired visas.'
+            });
+        }
+
+        console.log(`Processing deletion for ${expiredUsers.length} expired visa users...`);
+
+        // Proccess all users in parallel
+        const deletionPromises = expiredUsers.map(async (user) => {
+            try {
+                // Delete associated media
+                await deleteUserMedia(user);
+
+                // Send notification email
+                await sendDeletionEmail(user);
+
+                // Delete user from database
+                await User.findByIdAndDelete(user._id);
+
+                console.log(`✅ Successfully deleted user: ${user._id} (${user.email})`);
+            } catch (error) {
+                console.error(`❌ Failed to delete user: ${user._id} (${user.email}) - ${error.message}`);
+            }
+        });
+
+        // Wait for all deletions to complete
+        await Promise.all(deletionPromises);
+
+        // fFinal response
+        res.status(200).json({
+            status: 'success',
+            message: `${expiredUsers.length} user(s) with expired visas have been cleaned up.`,
+            deletedCount: expiredUsers.length
+        });
+    } catch (error) {
+        console.error('Critical error during cron job execution:', error);
+        return next(new AppError('Failed to process expired visa users.', 500));
     }
-
-    for (const user of expiredUsers) {
-        await deleteUserImages(user);
-        await sendDeletionEmail(user);
-        await User.findByIdAndDelete(user._id);
-    }
-
-    res.status(200).json({
-        status: 'success',
-        message: 'Users with expired visas have been successfully deleted.'
-    });
 });

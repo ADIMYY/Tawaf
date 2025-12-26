@@ -1,41 +1,100 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
+
+const placeBaseSchema = new mongoose.Schema({
+    translationKey: {
+        type: String,
+        required: true,
+        trim: true,
+    },
+    name: {
+        type: String,
+        required: true,
+        trim: true
+    },
+    phone: {
+        type: String,
+        trim: true
+    },
+    location: {
+        type: String,
+        required: true,
+        trim: true
+    },
+    image: {
+        type: String,
+        trim: true
+    },
+    locationUrl: {
+        type: String,
+        trim: true
+    }
+}, { _id: false }); // No separate _id for subdocs
 
 const restaurantSchema = new mongoose.Schema({
-    name: String,
-    typeOfFood: String,
-    workSchedules: String,
-    phone: String,
-    location: String,
-    image: String,
-    locationUrl: String,
-});
+    ...placeBaseSchema.obj,
+    typeOfFood: {
+        type: String,
+        trim: true
+    },
+    workSchedules: {
+        type: String,
+        required: true,
+        trim: true
+    }
+}, { _id: false });
 
-const shopSchema = new mongoose.Schema({ // for cafe, supermarket
-    name: String, 
-    workSchedules: String,
-    phone: String,
-    location: String,
-    image: String,
-    locationUrl: String,
-});
+const cafeSchema = new mongoose.Schema({
+    ...placeBaseSchema.obj,
+    workSchedules: {
+        type: String,
+        required: true,
+        trim: true
+    }
+}, { _id: false });
 
-const hotelsSchema = new mongoose.Schema({
-    name: String,
-    category: String,
-    phone: String,
-    location: String,
-    image: String,
-    locationUrl: String,
-});
+const supermarketSchema = new mongoose.Schema({
+    ...placeBaseSchema.obj,
+    workSchedules: {
+        type: String,
+        required: true,
+        trim: true
+    }
+}, { _id: false });
 
-const dataSchema = new mongoose.Schema({
-    city: String,
+const hotelSchema = new mongoose.Schema({
+    ...placeBaseSchema.obj,
+    category: {
+        type: String,
+        required: true,
+        trim: true
+    },
+    workSchedules: {
+        type: String,
+        trim: true
+    }
+}, { _id: false });
+
+const aroundYouSchema = new mongoose.Schema({
+    city: {
+        type: String,
+        required: true,
+        trim: true,
+        enum: ['Mecca', 'Medina', 'Jeddah', 'Riyadh'], // optional: restrict cities
+        index: true // 🔍 Critical for performance
+    },
     restaurants: [restaurantSchema],
-    cafes: [shopSchema],
-    supermarkets: [shopSchema],
-    hotels: [hotelsSchema],
+    cafes: [cafeSchema],
+    supermarkets: [supermarketSchema],
+    hotels: [hotelSchema]
 }, {
     timestamps: true
 });
 
-export default mongoose.model('AroundYou', dataSchema);
+aroundYouSchema.pre('save', function (next) {
+    if (this.city) {
+        this.city = this.city.trim().toLowerCase();
+    }
+    next();
+});
+
+export default mongoose.model('AroundYou', aroundYouSchema);
