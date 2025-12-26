@@ -1,5 +1,5 @@
 import { param } from 'express-validator';
-import validatorMiddleware from '../../middleware/validatorMiddleware.js';
+import validatorMiddleware from '../../Middleware/validatorMiddleware.js';
 
 export const weatherValidator = [
     param('lat')
